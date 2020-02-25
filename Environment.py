@@ -64,3 +64,22 @@ def getNextStates(h1, h2, v, t, x_0, v_0):
     xnew = newPos(a, t, v, x_0)
     vnew = newSpeed(a, t, v_0)
     return xnew, vnew
+
+
+def choose_action(states, actions, qTables, epsilon=0.1):
+    """
+    Select next action balancing exploration and exploitation
+    :param states: previous states
+    :param actions: indexes of the actions
+    :param qTables: QTable
+    :param epsilon: parameter used to adopt exploration/exploitation
+    :return: the index of the next action to perform
+    """
+    new_actions = [] * len(qTables)
+    for q in range(len(qTables)):
+        if np.random.uniform() < epsilon:
+            action = np.random.choice(actions)
+        else:
+            action = np.argmax(qTables[q, states, :])
+        new_actions[q] = action
+    return new_actions
