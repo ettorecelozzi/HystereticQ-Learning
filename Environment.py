@@ -8,8 +8,7 @@ def reward(x, v):
     :param v: second state (derivate of the state (speed))
     :return: the reward with respect of the states
     """
-    return 0.8 * np.exp(-(np.power(x, 2) / np.power(0.25, 2))) \
-           + 0.2 * np.exp(-(np.power(v, 2) / np.power(0.25, 2)))
+    return 0.8 * np.exp(-(np.power(x, 2) / np.power(0.25, 2))) + 0.2 * np.exp(-(np.power(v, 2) / np.power(0.25, 2)))
 
 
 def dynamic(h1, h2, v):
@@ -61,7 +60,7 @@ def getNextStates(h1, h2, v, t, x_0, v_0):
     :param v_0: initial speed
     :return: new states
     """
-    a = dynamic(h1, h1, v)
+    a = dynamic(h1, h2, v)
     xnew = newPos(a, t, v, x_0)
     vnew = newSpeed(a, t, v_0)
     return xnew, vnew
