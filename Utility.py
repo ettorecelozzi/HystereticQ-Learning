@@ -32,3 +32,15 @@ def checkstates(states, qTables):
             discrete_states = min(keys, key=lambda x: euclidean(x, states))
             return discrete_states
     return states
+
+
+def countNot0(qTables):
+    counter = [0] * len(qTables)
+    qTable_index = 0
+    for q in qTables:
+        for state in q:
+            for a in q[state]:
+                if q[state][a] != 0.0:
+                    counter[qTable_index] += 1
+        qTable_index += 1
+    print(counter)

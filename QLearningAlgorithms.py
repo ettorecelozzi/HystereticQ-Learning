@@ -32,7 +32,7 @@ def centralized(states, actions, r, gamma, alpha, qTable, new_states):
     :return: qTable updated
     """
     qTable[states][actions] = \
-        (1 - alpha) * qTable[states][actions] + alpha * [r + gamma * (np.max(qTable[new_states]))]
+        (1 - alpha) * qTable[states][actions] + alpha * [r + gamma * (max(qTable[new_states].values()))]
     return qTable
 
 
@@ -49,9 +49,8 @@ def decentralized(qTables, states, actions, alpha, r, gamma, new_states):
     new_states: new states
     :return: qTables updated
     """
-    # states = getNextStates(h1, h2, v, t, x_0, v_0) # this to discover the actions of the new states
     for a, q in zip(actions, qTables):
-        q[states][a] = (1 - alpha) * q[states][a] + alpha * [r + gamma * (np.max(q[new_states]))]
+        q[states][a] = (1 - alpha) * q[states][a] + alpha * (r + gamma * max(q[new_states].values()))
     return qTables
 
 
@@ -70,7 +69,7 @@ def hysteretic(qTables, states, actions, alpha, beta, r, gamma, new_states):
     :return: qTables updated
     """
     for a, q in zip(actions, qTables):
-        delta = r + gamma * np.max(q[new_states]) - q[states][a]
+        delta = r + gamma * max(q[new_states].values()) - q[states][a]
         if delta >= 0:
             q[states][a] += delta * alpha
         else:
