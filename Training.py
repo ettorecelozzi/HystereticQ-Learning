@@ -25,7 +25,7 @@ def trainDistributed():
 
             # dynamic computed inside
             x, v = getNextStates(h1=new_action[0], h2=new_action[1], v=states[1], t=t, x_0=states[0], v_0=states[1])
-            if np.abs(x) > 2 or np.abs(v) > 1: break  # the ball has fallen
+            if np.abs(x) > 1 or np.abs(v) > 3: break  # the ball has fallen
 
             r = reward(x, v)
             states = (np.round(x, decimals=1), np.round(v, decimals=1))
@@ -33,9 +33,8 @@ def trainDistributed():
             qTables = distributed(qTables, r, states, actions, alpha)
     countNot0(qTables)
 
-    pd.DataFrame.from_dict(qTables[0], orient='index').to_csv('./QTables/qT1.csv')
-
-    pd.DataFrame.from_dict(qTables[1], orient='index').to_csv('./QTables/qT2.csv')
+    pd.DataFrame.from_dict(qTables[0], orient='index').to_csv('./QTables/qT1_Distributed.csv')
+    pd.DataFrame.from_dict(qTables[1], orient='index').to_csv('./QTables/qT2_Distributed.csv')
 
 
 def trainDecentralized():
@@ -56,7 +55,7 @@ def trainDecentralized():
 
             # dynamic computed inside
             x, v = getNextStates(h1=new_action[0], h2=new_action[1], v=states[1], t=t, x_0=states[0], v_0=states[1])
-            if np.abs(x) > 2 or np.abs(v) > 1: break  # the ball has fallen
+            if np.abs(x) > 1 or np.abs(v) > 3: break  # the ball has fallen
 
             r = reward(x, v)
             new_states = (np.round(x, decimals=1), np.round(v, decimals=1))
@@ -66,14 +65,8 @@ def trainDecentralized():
     print(qTables[0])
     countNot0(qTables)
 
-    df1 = pd.DataFrame.from_dict(qTables[0], orient='index')
-    df1.index.name = 'States'
-    print(df1)
-
-    df2 = pd.DataFrame.from_dict(qTables[1], orient='index')
-    df2.index.name = 'States'
-    print(df2)
-
+    pd.DataFrame.from_dict(qTables[0], orient='index').to_csv('./QTables/qT1_Decentralized.csv')
+    pd.DataFrame.from_dict(qTables[1], orient='index').to_csv('./QTables/qT2_Decentralized.csv')
 
 def trainHysteretic():
     # parameters
@@ -94,7 +87,7 @@ def trainHysteretic():
 
             # dynamic computed inside
             x, v = getNextStates(h1=new_action[0], h2=new_action[1], v=states[1], t=t, x_0=states[0], v_0=states[1])
-            if np.abs(x) > 2 or np.abs(v) > 1: break  # the ball has fallen
+            if np.abs(x) > 1 or np.abs(v) > 3: break  # the ball has fallen
 
             r = reward(x, v)
             new_states = (np.round(x, decimals=1), np.round(v, decimals=1))
@@ -104,13 +97,7 @@ def trainHysteretic():
     print(qTables[0])
     countNot0(qTables)
 
-    df1 = pd.DataFrame.from_dict(qTables[0], orient='index')
-    df1.index.name = 'States'
-    print(df1)
-
-    df2 = pd.DataFrame.from_dict(qTables[1], orient='index')
-    df2.index.name = 'States'
-    print(df2)
-
+    pd.DataFrame.from_dict(qTables[0], orient='index').to_csv('./QTables/qT1_Hysteretic.csv')
+    pd.DataFrame.from_dict(qTables[1], orient='index').to_csv('./QTables/qT2_Hysteretic.csv')
 
 trainDistributed()

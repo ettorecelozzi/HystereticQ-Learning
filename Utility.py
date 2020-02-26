@@ -8,7 +8,7 @@ def generateQTable():
     :return: QTable
     """
     dict = {}
-    positions = np.round(list(np.linspace(-2, 2, 100)), decimals=1)
+    positions = np.round(list(np.linspace(-1, 1, 100)), decimals=1)
     velocities = np.round(list(np.linspace(-3, 3, 50)), decimals=1)
     actions = np.round(list(np.linspace(-1, 1, 15)), decimals=1)
     for p in positions:
