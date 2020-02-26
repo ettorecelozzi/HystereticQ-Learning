@@ -13,9 +13,10 @@ def distributed(qTables, r, x, v, actions, alpha):
     :return: the qtables updated
     """
     for a, q in zip(actions, qTables):
-        delta = r - q[x, v, a]
+        a = str(a)
+        delta = r - q[x][v][a]
         if delta >= 0:
-            q[x, v, a] += alpha * delta
+            q[x][v][a] += alpha * delta
     return qTables
 
 
