@@ -81,46 +81,8 @@ def choose_action(states, actions, qTables, epsilon=0.1):
         if np.random.uniform() < epsilon:
             action = np.random.choice(actions)
         else:
-            action = np.argmax(qTables[q][states[0]][states[1]])
+            action = np.argmax(qTables[q][states])
         new_actions[q] = action
     return new_actions
 
 
-def generateQTable():
-    """
-
-    :return:
-    """
-    dict = {}
-    positions = np.round(list(np.linspace(-2, 2, 100)), decimals=1)
-    velocities = np.round(list(np.linspace(-3, 3, 50)), decimals=1)
-    actions = np.round(list(np.linspace(-1, 1, 15)), decimals=1)
-    for p in positions:
-        dict[str(p)] = {}
-        for v in velocities:
-            dict[str(p)][str(v)] = {}
-            for a in actions:
-                dict[str(p)][str(v)][str(a)] = 0.0
-    return dict
-
-
-def checkstates(states, qTables):
-    """
-
-    :param states: float states
-    :param qTables: QTable of the agent. Two for decentralized
-    :return: states in the discrete grid
-    """
-    numberOfStates = len(states)
-    discrete_states = [0.0] * numberOfStates
-    strStates = [str(x) for x in states]
-    for q in qTables:
-        keys = np.array(list(q.keys()), dtype=float)
-        if states[0] not in keys:
-            discrete_states[0] = min(keys, key=lambda x: abs(x - states[0]))
-
-        keys = np.array(list(q[strStates[0]].keys()), dtype=float)
-        if states[1] not in keys:
-            discrete_states[1] = min(keys, key=lambda x: abs(x - states[1]))
-            return discrete_states
-    return states

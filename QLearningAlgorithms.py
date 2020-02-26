@@ -1,26 +1,24 @@
 from Environment import *
 
 
-def distributed(qTables, r, x, v, actions, alpha):
+def distributed(qTables, r, states, actions, alpha):
     """
     Eq. 2 Hysteretic Q-Learning paper.
     qTables: Qtables of the agents
     r: reward
-    x: first state Qtable index
-    v: second state Qtable index
+    states: states as QTable index
     actions: actions available
     alpha: learning rate
     :return: the qtables updated
     """
     for a, q in zip(actions, qTables):
-        a = str(a)
-        delta = r - q[x][v][a]
+        delta = r - q[states][a]
         if delta >= 0:
-            q[x][v][a] += alpha * delta
+            q[states][a] += alpha * delta
     return qTables
 
 
-def centralized(x, v, actions, r, gamma, alpha, qTable, states):
+def centralized(states, actions, r, gamma, alpha, qTable, new_states):
     """
     Eq. 4 Hysteretic Q-Learning paper
     x: first state index
@@ -30,15 +28,15 @@ def centralized(x, v, actions, r, gamma, alpha, qTable, states):
     gamma: discount factor
     alpha: learning rate
     qTable: single qTable of the "central" agent. Shape = (100,50,15,15)
-    states: new states
+    new_states: new states
     :return: qTable updated
     """
-    qTable[x, v, actions] = \
-        (1 - alpha) * qTable[x, v, actions] + alpha * [r + gamma * (np.max(qTable[states[0], states[1]]))]
+    qTable[states][actions] = \
+        (1 - alpha) * qTable[states][actions] + alpha * [r + gamma * (np.max(qTable[new_states]))]
     return qTable
 
 
-def decentralized(qTables, x, v, actions, alpha, r, gamma, states):
+def decentralized(qTables, states, actions, alpha, r, gamma, new_states):
     """
     Eq. 5 Hysteretic Q-Learning paper
     qTables: list of the qTables, one for each agent. Shape = (100,50,15)
@@ -48,16 +46,16 @@ def decentralized(qTables, x, v, actions, alpha, r, gamma, states):
     r: reward
     gamma: discount factor
     alpha: learning rate
-    states: new states
+    new_states: new states
     :return: qTables updated
     """
     # states = getNextStates(h1, h2, v, t, x_0, v_0) # this to discover the actions of the new states
     for a, q in zip(actions, qTables):
-        q[x, v, a] = (1 - alpha) * q[x, v, a] + alpha * [r + gamma * (np.max(q[states[0], states[1]]))]
+        q[states][a] = (1 - alpha) * q[states][a] + alpha * [r + gamma * (np.max(q[new_states]))]
     return qTables
 
 
-def hysteretic(qTables, x, v, actions, alpha, beta, r, gamma, states):
+def hysteretic(qTables, states, actions, alpha, beta, r, gamma, new_states):
     """
     Eq. 6 Hysteretic Q-Learning paper
     qTables: list of the qTables, one for each agent. Shape = (100,50,15)
@@ -68,13 +66,13 @@ def hysteretic(qTables, x, v, actions, alpha, beta, r, gamma, states):
     beta: second learning rate
     r: reward
     gamma: discount factor
-    states: new states
+    new_states: new states
     :return: qTables updated
     """
     for a, q in zip(actions, qTables):
-        delta = r + gamma * np.max(q[states[0], states[1]]) - q[x, v, a]
+        delta = r + gamma * np.max(q[new_states]) - q[states][a]
         if delta >= 0:
-            q[x, v, a] += delta * alpha
+            q[states][a] += delta * alpha
         else:
-            q[x, v, a] += delta * beta
+            q[states][a] += delta * beta
     return qTables
