@@ -23,6 +23,7 @@ def dynamic(h1, h2, v):
     g = 9.8
     l = 2
     c = 0.01
+    # print(h1,h2,v)
     return ((-c * v) + (m * g * ((h1 - h2) / l))) / m
 
 
@@ -66,14 +67,14 @@ def getNextStates(h1, h2, v, t, x_0, v_0):
     return xnew, vnew
 
 
-def choose_action(states, actions, qTables, epsilon=0.1):
+def choose_action(states, actions, qTables, epsilon=0.2):
     """
     Select next action balancing exploration and exploitation
-    :param decision: key index for QTable (state
+    :param states: actual states
     :param actions: indexes of the actions
     :param qTables: QTable
     :param epsilon: parameter used to adopt exploration/exploitation
-    :return: the index of the next action to perform
+    :return: the new actions to perform
     """
     numberOfAgents = len(qTables)
     new_actions = [0] * numberOfAgents
@@ -81,7 +82,7 @@ def choose_action(states, actions, qTables, epsilon=0.1):
         if np.random.uniform() < epsilon:
             action = np.random.choice(actions)
         else:
-            action = np.argmax(qTables[q][states])
+            action = max(qTables[q][states].values())
         new_actions[q] = action
     return new_actions
 

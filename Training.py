@@ -21,16 +21,21 @@ def trainDistributed():
     for trial in range(5000):
         states = (0.5, 0.1)  # initial states
         for t in np.arange(0, 20, 0.03):
-            new_action = choose_action(states, actions, qTables)
+            new_actions = choose_action(states, actions, qTables)
 
             # dynamic computed inside
-            x, v = getNextStates(h1=new_action[0], h2=new_action[1], v=states[1], t=t, x_0=states[0], v_0=states[1])
+            x, v = getNextStates(h1=new_actions[0], h2=new_actions[1], v=states[1], t=t, x_0=states[0], v_0=states[1])
             if np.abs(x) > 1 or np.abs(v) > 3: break  # the ball has fallen
 
             r = reward(x, v)
             states = (np.round(x, decimals=1), np.round(v, decimals=1))
-            states = checkstates(states, qTables)  # check if the states have a match in the discrete grid
-            qTables = distributed(qTables, r, states, actions, alpha)
+            states = check_states(states, qTables)  # check if the states have a match in the discrete grid
+
+            new_actions = np.round(new_actions, decimals=1)
+            new_actions = check_actions(new_actions, actions)
+
+            qTables = distributed(qTables, r, states, new_actions, alpha)
+
     countNot0(qTables)
 
     pd.DataFrame.from_dict(qTables[0], orient='index').to_csv('./QTables/qT1_Distributed.csv')
@@ -59,7 +64,7 @@ def trainDecentralized():
 
             r = reward(x, v)
             new_states = (np.round(x, decimals=1), np.round(v, decimals=1))
-            new_states = checkstates(new_states, qTables)  # check if the states have a match in the discrete grid
+            new_states = check_states(new_states, qTables)  # check if the states have a match in the discrete grid
             qTables = decentralized(qTables, states, actions, alpha, r, gamma, new_states)
             states = new_states
     print(qTables[0])
@@ -67,6 +72,7 @@ def trainDecentralized():
 
     pd.DataFrame.from_dict(qTables[0], orient='index').to_csv('./QTables/qT1_Decentralized.csv')
     pd.DataFrame.from_dict(qTables[1], orient='index').to_csv('./QTables/qT2_Decentralized.csv')
+
 
 def trainHysteretic():
     # parameters
@@ -91,7 +97,7 @@ def trainHysteretic():
 
             r = reward(x, v)
             new_states = (np.round(x, decimals=1), np.round(v, decimals=1))
-            new_states = checkstates(new_states, qTables)  # check if the states have a match in the discrete grid
+            new_states = check_states(new_states, qTables)  # check if the states have a match in the discrete grid
             qTables = hysteretic(qTables, states, actions, alpha, beta, r, gamma, new_states)
             states = new_states
     print(qTables[0])
@@ -99,5 +105,6 @@ def trainHysteretic():
 
     pd.DataFrame.from_dict(qTables[0], orient='index').to_csv('./QTables/qT1_Hysteretic.csv')
     pd.DataFrame.from_dict(qTables[1], orient='index').to_csv('./QTables/qT2_Hysteretic.csv')
+
 
 trainDistributed()

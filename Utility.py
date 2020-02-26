@@ -19,19 +19,40 @@ def generateQTable():
     return dict
 
 
-def checkstates(states, qTables):
+def check_states(states, qTables):
     """
     Verify if the new states belong to the discrete grid
     :param states: float states
     :param qTables: QTable of the agent. Two for decentralized
     :return: states in the discrete grid
     """
-    for q in qTables:
-        keys = list(q.keys())
+    discrete_states = -1
+    discrete = False
+    for q in range(len(qTables)):
+        keys = list(qTables[q].keys())
         if states not in keys:
             discrete_states = min(keys, key=lambda x: euclidean(x, states))
-            return discrete_states
-    return states
+            discrete = True
+    return discrete_states if discrete else states
+
+
+def check_actions(new_actions, actions):
+    """
+
+    :param new_actions:
+    :param actions:
+    :return:
+    """
+    discrete_actions = [0.0] * len(new_actions)
+    discrete = False
+    # print(new_actions)
+    for a in range(len(new_actions)):
+        if new_actions[a] not in actions:
+            discrete_actions[a] = min(actions, key=lambda x: abs(x - new_actions[a]))
+            discrete = True
+    # print('disc')
+    # print(discrete_actions)
+    return discrete_actions if discrete else new_actions
 
 
 def countNot0(qTables):
