@@ -2,6 +2,11 @@ from QLearningAlgorithms import *
 from Utility import *
 import pandas as pd
 
+pd.set_option('display.max_rows', 2050)
+pd.set_option('display.max_columns', 15)
+pd.set_option('display.expand_frame_repr', False)
+pd.set_option('display.width', 1000)
+
 
 def trainDistributed():
     # parameters
@@ -26,8 +31,11 @@ def trainDistributed():
             states = (np.round(x, decimals=1), np.round(v, decimals=1))
             states = checkstates(states, qTables)  # check if the states have a match in the discrete grid
             qTables = distributed(qTables, r, states, actions, alpha)
-    print(qTables[0])
     countNot0(qTables)
+
+    pd.DataFrame.from_dict(qTables[0], orient='index').to_csv('./QTables/qT1.csv')
+
+    pd.DataFrame.from_dict(qTables[1], orient='index').to_csv('./QTables/qT2.csv')
 
 
 def trainDecentralized():
@@ -58,6 +66,14 @@ def trainDecentralized():
     print(qTables[0])
     countNot0(qTables)
 
+    df1 = pd.DataFrame.from_dict(qTables[0], orient='index')
+    df1.index.name = 'States'
+    print(df1)
+
+    df2 = pd.DataFrame.from_dict(qTables[1], orient='index')
+    df2.index.name = 'States'
+    print(df2)
+
 
 def trainHysteretic():
     # parameters
@@ -87,6 +103,14 @@ def trainHysteretic():
             states = new_states
     print(qTables[0])
     countNot0(qTables)
+
+    df1 = pd.DataFrame.from_dict(qTables[0], orient='index')
+    df1.index.name = 'States'
+    print(df1)
+
+    df2 = pd.DataFrame.from_dict(qTables[1], orient='index')
+    df2.index.name = 'States'
+    print(df2)
 
 
 trainDistributed()
