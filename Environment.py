@@ -23,7 +23,6 @@ def dynamic(h1, h2, v):
     g = 9.8
     l = 2
     c = 0.01
-    # print(h1,h2,v)
     return ((-c * v) + (m * g * ((h1 - h2) / l))) / m
 
 

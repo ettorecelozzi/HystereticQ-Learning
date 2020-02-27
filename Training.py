@@ -61,7 +61,7 @@ def trainDecentralized():
             new_states = (np.round(x, decimals=1), np.round(v, decimals=1))
             new_states = check_states(new_states, qTables)  # check if the states have a match in the discrete grid
 
-            new_actions = np.round(new_actions, decimals=1)
+            new_actions = np.round(new_actions, decimals=1)  # check if the actions have a match in the discrete grid
             new_actions = check_actions(new_actions, actions)
 
             qTables = decentralized(qTables, states, new_actions, alpha, r, gamma, new_states)
@@ -108,9 +108,10 @@ def trainHysteretic():
     pd.DataFrame.from_dict(qTables[0], orient='index').to_csv('./QTables/qT1_Hysteretic.csv')
     pd.DataFrame.from_dict(qTables[1], orient='index').to_csv('./QTables/qT2_Hysteretic.csv')
 
+
 print('Distributed case')
 trainDistributed()
 print('Decentralized case')
 trainDecentralized()
-print('Hysteteric case')
+print('Hysteretic case')
 trainHysteretic()
