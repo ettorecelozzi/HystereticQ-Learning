@@ -7,9 +7,9 @@ def generateQTable():
     :return: QTable
     """
     dict = {}
-    positions = np.round(list(np.linspace(-1, 1, 100)), decimals=1)
-    velocities = np.round(list(np.linspace(-3, 3, 50)), decimals=1)
-    actions = np.round(list(np.linspace(-1, 1, 15)), decimals=1)
+    positions = np.round(list(np.linspace(-1, 1, 100)), decimals=2)
+    velocities = np.round(list(np.linspace(-3, 3, 50)), decimals=2)
+    actions = np.round(list(np.linspace(-1, 1, 15)), decimals=2)
     for p in positions:
         for v in velocities:
             dict[(p, v)] = {}
@@ -78,12 +78,12 @@ def getNextStates(h1, h2, v, t, x_0, v_0):
     :return: new states
     """
     a = dynamic(h1, h2, v)
-    xnew = newPos(a, t, v, x_0)
-    vnew = newSpeed(a, t, v_0)
+    xnew = newPos(a, 0.3, v, x_0)
+    vnew = newSpeed(a, 0.3, v_0)
     return xnew, vnew
 
 
-def choose_action(states, actions, qTables, epsilon=0.2):
+def choose_action(states, actions, qTables, epsilon=0.1):
     """
     Select next action balancing exploration and exploitation
     :param states: actual states
@@ -98,6 +98,12 @@ def choose_action(states, actions, qTables, epsilon=0.2):
         if np.random.uniform() < epsilon:
             action = np.random.choice(actions)
         else:
-            action = max(qTables[q][states].values())
+            action = getKeysByValue(qTables[q][states],max(qTables[q][states].values()))
         new_actions[q] = action
     return new_actions
+
+def getKeysByValue(dictOfElements, valueToFind):
+    listOfItems = dictOfElements.items()
+    for item  in listOfItems:
+        if item[1] == valueToFind:
+            return item[0]
