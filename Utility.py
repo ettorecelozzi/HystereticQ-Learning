@@ -1,24 +1,3 @@
-import numpy as np
-from scipy.spatial.distance import euclidean
-
-
-def generateQTable():
-    """
-    Create qtable for the agent
-    :return: QTable
-    """
-    dict = {}
-    positions = np.round(list(np.linspace(-1, 1, 100)), decimals=1)
-    velocities = np.round(list(np.linspace(-3, 3, 50)), decimals=1)
-    actions = np.round(list(np.linspace(-1, 1, 15)), decimals=1)
-    for p in positions:
-        for v in velocities:
-            dict[(p, v)] = {}
-            for a in actions:
-                dict[(p, v)][a] = 0.0
-    return dict
-
-
 def check_states(states, qTables):
     """
     Verify if the new states belong to the discrete grid

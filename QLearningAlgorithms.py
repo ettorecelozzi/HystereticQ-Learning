@@ -1,6 +1,3 @@
-from Environment import *
-
-
 def distributed(qTables, r, states, actions, alpha):
     """
     Eq. 2 Hysteretic Q-Learning paper.
