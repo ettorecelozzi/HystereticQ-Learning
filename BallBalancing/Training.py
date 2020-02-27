@@ -152,9 +152,4 @@ def trainHysteretic():
     pd.DataFrame.from_dict(qTables[1], orient='index').to_csv('./QTables/qT2_Hysteretic.csv')
 
 
-print('Distributed case')
-trainDistributed()
-print('Decentralized case')
-trainDecentralized()
-print('Hysteteric case')
 trainHysteretic()
