@@ -98,6 +98,7 @@ def choose_action(states, actions, qTables, epsilon=0.1):
         if np.random.uniform() < epsilon:
             action = np.random.choice(actions)
         else:
+            
             action = getKeysByValue(qTables[q][states],max(qTables[q][states].values()))
         new_actions[q] = action
     return new_actions

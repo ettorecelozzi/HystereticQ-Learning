@@ -117,7 +117,7 @@ def trainHysteretic():
     output = []
 
     for trial in range(5000):
-        states = (0.5, 0.1)  # initial states
+        states = (0.49, 0.06)  # initial states
         rewardSum = 0
         for t in np.arange(0, 20, 0.03):
             new_actions = choose_action(states, actions, qTables)
