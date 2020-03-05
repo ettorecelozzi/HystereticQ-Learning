@@ -20,7 +20,7 @@ def centralized(states, actions, r, gamma, alpha, qTable, new_states):
     Eq. 4 Hysteretic Q-Learning paper
     x: first state index
     v: second state index
-    actions: all possible actions. Shape = (15,)
+    actions: actions chosen
     r: reward
     gamma: discount factor
     alpha: learning rate
@@ -29,7 +29,7 @@ def centralized(states, actions, r, gamma, alpha, qTable, new_states):
     :return: qTable updated
     """
     qTable[states][actions] = \
-        (1 - alpha) * qTable[states][actions] + alpha * [r + gamma * (max(qTable[new_states].values()))]
+        (1 - alpha) * qTable[states][actions] + alpha * (r + gamma * (max(qTable[new_states].values())))
     return qTable
 
 

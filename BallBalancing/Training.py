@@ -15,35 +15,39 @@ def trainDistributed():
     qTables = [qTable1, qTable2]
 
     actions = np.round(np.linspace(-1, 1, 15), decimals=2)
-    output = []
 
-    for trial in range(5000):
-        states = (0.49, 0.06)  # initial states
-        rewardSum = 0
-        for t in np.arange(0, 20, 0.03):
-            new_actions = choose_action(states, actions, qTables)
+    output20 = []
+    for i in range(20):
+        output = []
+        for trial in range(5000):
+            states = (0.49, 0.06)  # initial states
+            rewardSum = 0
 
-            # dynamic computed inside
-            x, v = getNextStates(h1=new_actions[0], h2=new_actions[1], v=states[1], t=t, x_0=states[0], v_0=states[1])
-            if np.abs(x) > 1 or np.abs(v) > 3: break  # the ball has fallen
+            for t in np.arange(0, 20, 0.03):
+                new_actions = choose_action(states, actions, qTables, trial)
 
-            r = reward(x, v)
-            rewardSum = rewardSum + r
+                # dynamic computed inside
+                x, v = getNextStates(h1=new_actions[0], h2=new_actions[1], v=states[1], t=t, x_0=states[0],
+                                     v_0=states[1])
 
-            states = (np.round(x, decimals=2), np.round(v, decimals=2))
-            states = check_states(states)  # check if the states have a match in the discrete grid
+                # saturation of the speed
+                if v > 3: v = 3
+                if v < -3: v = -3
 
-            new_actions = np.round(new_actions, decimals=2)
-            new_actions = check_actions(new_actions, actions)
+                if np.abs(x) > 1: break  # the ball has fallen
 
-            qTables = distributed(qTables, r, states, new_actions, alpha)
+                r = reward(states[0], states[1])
+                rewardSum += r
 
-        output.append(rewardSum)
-        # if trial == 0:
-        #     output.append(rewardSum)
-        # else:
-        #     output.append(output[trial-1]+rewardSum)
-    plt.scatter(list(range(5000)), output)
+                states = (np.round(x, decimals=2), np.round(v, decimals=2))
+                states = check_states(states)  # check if the states have a match in the discrete grid
+
+                qTables = distributed(qTables, r, states, new_actions, alpha)
+
+            output.append(rewardSum)
+        output20.append(output)
+    mean_output = np.mean(output20, axis=0)
+    plt.scatter(list(range(5000)), mean_output)
     plt.show()
 
     countNot0(qTables)
@@ -63,37 +67,38 @@ def trainDecentralized():
     qTables = [qTable1, qTable2]
 
     actions = np.round(np.linspace(-1, 1, 15), decimals=2)
-    output = []
 
-    for trial in range(5000):
-        states = (0.49, 0.06)  # initial states
-        rewardSum = 0
-        for t in np.arange(0, 20, 0.03):
-            new_actions = choose_action(states, actions, qTables)
+    output20 = []
+    for i in range(20):
+        output = []
+        for trial in range(5000):
+            states = (0.49, 0.06)  # initial states
+            rewardSum = 0
+            for t in np.arange(0, 20, 0.03):
+                new_actions = choose_action(states, actions, qTables, trial)
 
-            # dynamic computed inside
-            x, v = getNextStates(h1=new_actions[0], h2=new_actions[1], v=states[1], t=t, x_0=states[0], v_0=states[1])
-            if np.abs(x) > 1 or np.abs(v) > 3: break  # the ball has fallen
+                # dynamic computed inside
+                x, v = getNextStates(h1=new_actions[0], h2=new_actions[1], v=states[1], t=t, x_0=states[0],
+                                     v_0=states[1])
+                # saturation of the speed
+                if v > 3: v = 3
+                if v < -3: v = -3
 
-            r = reward(x, v)
-            rewardSum = rewardSum + r
+                if np.abs(x) > 1: break  # the ball has fallen
 
-            new_states = (np.round(x, decimals=2), np.round(v, decimals=2))
-            new_states = check_states(new_states)  # check if the states have a match in the discrete grid
+                r = reward(states[0], states[1])
+                rewardSum += r
 
-            new_actions = np.round(new_actions, decimals=2)  # check if the actions have a match in the discrete grid
-            new_actions = check_actions(new_actions, actions)
+                new_states = (np.round(x, decimals=2), np.round(v, decimals=2))
+                new_states = check_states(new_states)  # check if the states have a match in the discrete grid
 
-            qTables = decentralized(qTables, states, new_actions, alpha, r, gamma, new_states)
-            states = new_states
+                qTables = decentralized(qTables, states, new_actions, alpha, r, gamma, new_states)
+                states = new_states
+            output.append(rewardSum)
+        output20.append(output)
 
-        output.append(rewardSum)
-        # if trial == 0:
-        #     output.append(rewardSum)
-        # else:
-        #     output.append(output[trial-1]+rewardSum)
-
-    plt.scatter(list(range(5000)), output)
+    mean_output = np.mean(output20, axis=0)
+    plt.scatter(list(range(5000)), mean_output)
     plt.show()
 
     countNot0(qTables)
@@ -114,31 +119,51 @@ def trainHysteretic():
     qTables = [qTable1, qTable2]
 
     actions = np.round(np.linspace(-1, 1, 15), decimals=2)
+
     output20 = []
-    for i in range(1):
+    for i in range(20):
         output = []
         for trial in range(5000):
+            printProgressBar(trial, 5000, prefix='Iteration: ' + str(i))
             states = (0.49, 0.06)  # initial states
             rewardSum = 0
+            xs = []
+            vs = []
+
             for t in np.arange(0, 20, 0.03):
-                new_actions = choose_action(states, actions, qTables)
+
+                new_actions = choose_action(states, actions, qTables, trial, numOfEps=0)
 
                 # dynamic computed inside
-                x, v = getNextStates(h1=new_actions[0], h2=new_actions[1], v=states[1], t=t, x_0=states[0],
+                x, v = getNextStates(h1=new_actions[0], h2=new_actions[1], v=states[1], t=0.3, x_0=states[0],
                                      v_0=states[1])
-                if np.abs(x) > 1 or np.abs(v) > 3: break  # the ball has fallen
 
-                r = reward(x, v)
+                # saturation of the speed
+                if v > 3: v = 3
+                if v < -3: v = -3
+
+                # if trial > 4500:
+                #     xs.append(x)
+                #     vs.append(v)
+                #
+                if np.abs(x) > 1: break
+
+                r = reward(states[0], states[1])
                 rewardSum = rewardSum + r
 
-                new_states = (np.round(x, decimals=2), np.round(v, decimals=2))
+                new_states = (x, v)
                 new_states = check_states(new_states)  # check if the states have a match in the discrete grid
-
-                new_actions = np.round(new_actions, decimals=2)
-                new_actions = check_actions(new_actions, actions)
 
                 qTables = hysteretic(qTables, states, new_actions, alpha, beta, r, gamma, new_states)
                 states = new_states
+
+            # if trial > 4500:
+            #     plt.scatter(range(len(xs)), xs)
+            #     plt.savefig("./Plots/Space/space" + str(trial))
+            #     plt.clf()
+            #     plt.scatter(range(len(vs)), vs)
+            #     plt.savefig("./Plots/Speed/speed" + str(trial))
+            #     plt.clf()
 
             output.append(rewardSum)
         output20.append(output)
@@ -151,6 +176,57 @@ def trainHysteretic():
     pd.DataFrame.from_dict(qTables[0], orient='index').to_csv('./QTables/qT1_Hysteretic.csv')
     pd.DataFrame.from_dict(qTables[1], orient='index').to_csv('./QTables/qT2_Hysteretic.csv')
 
-trainDistributed()
-trainDecentralized()
+
+def trainCentralized():
+    # parameters
+    alpha = 0.9
+    gamma = 0.9
+
+    # generate Q-Table
+    qTable = generateQTable(centralized=True)
+
+    actions = np.round(np.linspace(-1, 1, 15), decimals=2)
+
+    output20 = []
+    for i in range(1):
+        output = []
+        for trial in range(5000):
+            states = (0.49, 0.06)  # initial states
+            rewardSum = 0
+            for t in np.arange(0, 20, 0.03):
+                new_actions = choose_action(states, actions, qTable, trial, centralized=True, numOfEps=0)
+
+                # dynamic computed inside
+                x, v = getNextStates(h1=new_actions[0], h2=new_actions[1], v=states[1], t=t, x_0=states[0],
+                                     v_0=states[1])
+                # saturation of the speed
+                if v > 3: v = 3
+                if v < -3: v = -3
+
+                if np.abs(x) > 1: break  # the ball has fallen
+
+                r = reward(states[0], states[1])
+                rewardSum += r
+
+                new_states = (np.round(x, decimals=2), np.round(v, decimals=2))
+                new_states = check_states(new_states)  # check if the states have a match in the discrete grid
+
+                qTable = centralized(states, new_actions, r, gamma, alpha, qTable, new_states)
+                states = new_states
+
+            output.append(rewardSum)
+        output20.append(output)
+
+    mean_output = np.mean(output20, axis=0)
+    plt.scatter(list(range(5000)), mean_output)
+    plt.show()
+
+    countNot0([qTable])
+
+    pd.DataFrame.from_dict(qTable, orient='index').to_csv('./QTables/qT_Centralized.csv')
+
+
+# trainDistributed()
+# trainDecentralized()
 trainHysteretic()
+# trainCentralized()

@@ -1,90 +1,5 @@
 import numpy as np
 
-def check_states(states, qTables):
-    """
-    Verify if the new states belong to the discrete grid
-    :param states: float states
-    :param qTables: QTable of the agent. Two for decentralized
-    :return: states in the discrete grid
-    """
-    positions = np.round(list(np.linspace(-1, 1, 100)), decimals=2)
-    velocities = np.round(list(np.linspace(-3, 3, 50)), decimals=2)
-    position_space = 1/50
-    velocity_space = 3/25
-    position_index = np.abs(int(np.round(states[0] / position_space,decimals=0)))
-    velocity_index = np.abs(int(np.round(states[1] / velocity_space, decimals=0)))
-    if states[0] > 0:
-        position_index += 50
-    else:
-        position_index = 50 - position_index
-    if states[1] > 0:
-        velocity_index += 25
-    else:
-        velocity_index = 25 - velocity_index
-
-    if position_index != 100 and position_index != 0:
-        if position_index == 99:
-            possible_positions = [positions[position_index - 1], positions[position_index]]
-        else:
-            possible_positions = [positions[position_index - 1], positions[position_index], positions[position_index + 1]]
-    elif position_index == 100:
-        possible_positions = [positions[position_index - 1],positions[position_index - 2]]
-    else:
-        possible_positions = [positions[position_index], positions[position_index + 1]]
-
-    if velocity_index != 50 and velocity_index != 0:
-        if velocity_index == 49:
-            possible_velocities = [velocities[velocity_index - 1], velocities[velocity_index]]
-        else:
-            possible_velocities = [velocities[velocity_index - 1], velocities[velocity_index],
-                                   velocities[velocity_index + 1]]
-    elif velocity_index == 50:
-        possible_velocities = [velocities[velocity_index - 1],velocities[velocity_index -2]]
-    else:
-        possible_velocities = [velocities[velocity_index], velocities[velocity_index + 1]]
-
-    new_states = (min(possible_positions, key=lambda x:abs(x-states[0])),min(possible_velocities, key=lambda x:abs(x-states[1])))
-    return new_states
-
-    discrete_states = -1
-    discrete = False
-    for q in range(len(qTables)):
-        keys = list(qTables[q].keys())
-        if states not in keys:
-            # discrete_states = min(keys, key=lambda x: euclidean(x, states))
-            discrete_states = min(keys, key=lambda x: tuple_distance(x, states))
-            discrete = True
-    return discrete_states if discrete else states
-
-
-def tuple_distance(tuple1, tuple2):
-    """
-    Faster distances. Squared distances to speed up the calculation
-    :param tuple1: first tuple
-    :param tuple2: second tuple
-    :return: Squared distances.
-    """
-    distance = 0
-    for t1, t2 in zip(tuple1, tuple2):
-        distance += (t1 - t2) ** 2
-    return distance
-
-
-def check_actions(new_actions, actions):
-    """
-    Verify if the new action have a match in the discrete grid
-    :param new_actions: tuple of action to verify
-    :param actions: list of all discrete action available
-    :return: discrete actions if needed
-    """
-    discrete_actions = [0.0] * len(new_actions)
-    discrete = False
-    for a in range(len(new_actions)):
-        if new_actions[a] not in actions:
-            discrete_actions[a] = min(actions, key=lambda x: abs(x - new_actions[a]))
-            discrete = True
-    return discrete_actions if discrete else new_actions
-
 
 def countNot0(qTables):
     """
@@ -96,8 +11,37 @@ def countNot0(qTables):
     qTable_index = 0
     for q in qTables:
         for state in q:
-            for a in q[state]:
-                if q[state][a] != 0.0:
+            for action in q[state]:
+                if q[state][action] != 0.0:
                     counter[qTable_index] += 1
         qTable_index += 1
     print(counter)
+
+
+def printProgressBar(iteration, total, prefix='Progress:', suffix='', decimals=1, length=45, fill='█', printEnd="\r"):
+    """
+    Call in a loop to create terminal progress bar
+    Print fancy progress bars. From Greenstick at StackOverflow
+    https://stackoverflow.com/questions/3173320/text-progress-bar-in-the-console
+    usage:
+    for i in range(workamount):
+        doWork(i)
+        printProgressBar(i, workamount)
+
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : positive number of decimals in percent complete (Int)
+        length      - Optional  : character length of bar (Int)
+        fill        - Optional  : bar fill character (Str)
+        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
+    """
+    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
+    filledLength = int(length * iteration // total)
+    bar = fill * filledLength + '-' * (length - filledLength)
+    print('\r%s |%s| %s%% %s' % (prefix, bar, percent, suffix), end=printEnd)
+    # Print New Line on Complete
+    if iteration == total:
+        print()

@@ -1,21 +1,31 @@
 import numpy as np
 
 
-def generateQTable():
+def generateQTable(centralized=False):
     """
     Create qtable for the agent
+    :param centralized: boolean value to manage the centralized case.
     :return: QTable
     """
     dict = {}
     positions = np.round(list(np.linspace(-1, 1, 100)), decimals=2)
     velocities = np.round(list(np.linspace(-3, 3, 50)), decimals=2)
     actions = np.round(list(np.linspace(-1, 1, 15)), decimals=2)
-    for p in positions:
-        for v in velocities:
-            dict[(p, v)] = {}
-            for a in actions:
-                dict[(p, v)][a] = 0.0
-    return dict
+    if centralized is False:
+        for p in positions:
+            for v in velocities:
+                dict[(p, v)] = {}
+                for a in actions:
+                    dict[(p, v)][a] = 0.0
+        return dict
+    else:
+        for p in positions:
+            for v in velocities:
+                dict[(p, v)] = {}
+                for a1 in actions:
+                    for a2 in actions:
+                        dict[(p, v)][(a1, a2)] = 0.0
+        return dict
 
 
 def reward(x, v):
@@ -78,33 +88,103 @@ def getNextStates(h1, h2, v, t, x_0, v_0):
     :return: new states
     """
     a = dynamic(h1, h2, v)
-    xnew = newPos(a, 0.3, v, x_0)
-    vnew = newSpeed(a, 0.3, v_0)
+    xnew = newPos(a, t, v, x_0)
+    vnew = newSpeed(a, t, v_0)
     return xnew, vnew
 
 
-def choose_action(states, actions, qTables, epsilon=0.1):
+def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=20):
     """
     Select next action balancing exploration and exploitation
     :param states: actual states
-    :param actions: indexes of the actions
+    :param actions: list of actions available
     :param qTables: QTable
-    :param epsilon: parameter used to adopt exploration/exploitation
+    :param centralized: boolean variable to manage the centralized case
+    :param trial: number of the trial (Total 5000)
+    :param numOfEps: number of Epsilon. Epsilons are used to adopt exploration/exploitation
     :return: the new actions to perform
     """
-    numberOfAgents = len(qTables)
-    new_actions = [0] * numberOfAgents
-    for q in range(len(qTables)):
-        if np.random.uniform() < epsilon:
-            action = np.random.choice(actions)
+    if numOfEps > 0:
+        epsilons = np.linspace(0.9, 0.1, numOfEps)
+        index = int(trial // (5000 / numOfEps))
+        eps = epsilons[index]
+    else:
+        eps = 0.1
+
+    if centralized is False:
+        numberOfAgents = len(qTables)
+        new_actions = [0] * numberOfAgents
+        for q in range(len(qTables)):
+            if np.random.uniform() < eps:
+                action = np.random.choice(actions)
+            else:
+                action = getKeysByValue(qTables[q][states], max(qTables[q][states].values()))
+            new_actions[q] = action
+        return new_actions
+    else:
+        if np.random.uniform() < eps:
+            new_actions = [np.random.choice(actions), np.random.choice(actions)]
         else:
-            
-            action = getKeysByValue(qTables[q][states],max(qTables[q][states].values()))
-        new_actions[q] = action
-    return new_actions
+            new_actions = getKeysByValue(qTables[states], max(qTables[states].values()))
+        return tuple(new_actions)
+
 
 def getKeysByValue(dictOfElements, valueToFind):
+    """
+
+    :param dictOfElements:
+    :param valueToFind:
+    :return:
+    """
     listOfItems = dictOfElements.items()
-    for item  in listOfItems:
+    for item in listOfItems:
         if item[1] == valueToFind:
             return item[0]
+
+
+def check_states(states):
+    """
+    Verify if the new states belong to the discrete grid, otherwise return the closest discrete value in the grid
+    :param states: float states
+    :return: states in the discrete grid
+    """
+    positions = np.round(list(np.linspace(-1, 1, 100)), decimals=2)
+    velocities = np.round(list(np.linspace(-3, 3, 50)), decimals=2)
+    position_space = 1 / 50
+    velocity_space = 3 / 25
+    position_index = np.abs(int(np.round(states[0] / position_space, decimals=0)))
+    velocity_index = np.abs(int(np.round(states[1] / velocity_space, decimals=0)))
+    if states[0] > 0:
+        position_index += 50
+    else:
+        position_index = 50 - position_index
+    if states[1] > 0:
+        velocity_index += 25
+    else:
+        velocity_index = 25 - velocity_index
+
+    if position_index != 100 and position_index != 0:
+        if position_index == 99:
+            possible_positions = [positions[position_index - 1], positions[position_index]]
+        else:
+            possible_positions = [positions[position_index - 1], positions[position_index],
+                                  positions[position_index + 1]]
+    elif position_index == 100:
+        possible_positions = [positions[position_index - 1], positions[position_index - 2]]
+    else:
+        possible_positions = [positions[position_index], positions[position_index + 1]]
+
+    if velocity_index != 50 and velocity_index != 0:
+        if velocity_index == 49:
+            possible_velocities = [velocities[velocity_index - 1], velocities[velocity_index]]
+        else:
+            possible_velocities = [velocities[velocity_index - 1], velocities[velocity_index],
+                                   velocities[velocity_index + 1]]
+    elif velocity_index == 50:
+        possible_velocities = [velocities[velocity_index - 1], velocities[velocity_index - 2]]
+    else:
+        possible_velocities = [velocities[velocity_index], velocities[velocity_index + 1]]
+
+    new_states = (min(possible_positions, key=lambda x: abs(x - states[0])),
+                  min(possible_velocities, key=lambda x: abs(x - states[1])))
+    return new_states
