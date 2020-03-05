@@ -121,7 +121,7 @@ def trainHysteretic():
     actions = np.round(np.linspace(-1, 1, 15), decimals=2)
 
     output20 = []
-    for i in range(20):
+    for i in range(5):
         output = []
         for trial in range(5000):
             printProgressBar(trial, 5000, prefix='Iteration: ' + str(i))

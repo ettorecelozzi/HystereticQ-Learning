@@ -8,10 +8,13 @@ def getKeysByValue(dictOfElements, valueToFind):
     :param valueToFind:
     :return:
     """
-    listOfItems = dictOfElements.items()
-    for item in listOfItems:
-        if item[1] == valueToFind:
-            return item[0]
+    if dictOfElements:  # dictionary not empty
+        listOfItems = dictOfElements.items()
+        for item in listOfItems:
+            if item[1] == valueToFind:
+                return item[0]
+    else:
+        return 0
 
 
 def countNot0(qTables):

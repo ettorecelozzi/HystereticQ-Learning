@@ -110,7 +110,7 @@ def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=2
         index = int(trial // (5000 / numOfEps))
         eps = epsilons[index]
     else:
-        eps = 0.1
+        eps = 0.2
 
     if centralized is False:
         numberOfAgents = len(qTables)

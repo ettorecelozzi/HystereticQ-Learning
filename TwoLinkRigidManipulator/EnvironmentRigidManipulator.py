@@ -103,7 +103,6 @@ def getNextTheta2States(theta2, t, tau2, v2):
 
 def generateQTables(centralized=False):
     """
-
     :param centralized:
     :return:
     """
@@ -112,18 +111,15 @@ def generateQTables(centralized=False):
     tau1 = np.round(list(np.linspace(-0.2, 0.2, 50)), decimals=2)
     tau2 = np.round(list(np.linspace(-0.1, 0.1, 50)), decimals=2)
     if centralized is False:
-        qTable1 = {}
-        qTable2 = {}
+        qTable = {}
         for ang1 in angles:  # theta1
             for ang2 in angles:  # theta2
-                for spd in speeds:
-                    qTable2[(ang2, spd)] = {}
-                    qTable1[(ang1, ang2, spd)] = {}
-                    for t1 in tau1:
-                        for t2 in tau2:
-                            qTable1[(ang1, ang2, spd)][(t1, t2)] = 0.0
-                            qTable2[(ang2, spd)][t2] = 0.0
-        return [qTable1, qTable2]
+                for spd1 in speeds:
+                    for spd2 in speeds:
+                        qTable[(ang1, ang2, spd1, spd2)] = {}
+                        for t in tau1:
+                            qTable[(ang1, ang2, spd1, spd2)][t] = 0.0
+        return qTable
     else:
         qTable = {}
         for ang1 in angles:  # theta1
@@ -136,23 +132,19 @@ def generateQTables(centralized=False):
                                 qTable[(ang1, ang2, spd1, spd2)][(t1, t2)] = 0.0
         return qTable
 
-def reward(angle, velocity, centralized = False):
+
+def reward(angle, velocity):
     """
     Reward function
     :param x: first state (space)
     :param v: second state (derivate of the state (speed))
     :return: the reward with respect of the states
     """
-    if centralized is False:
-        if np.abs(angle) <= 5*(np.pi/180) and np.abs(velocity) <= 0.1:
-            return 0
-        else:
-            return -0.5
+    if np.abs(angle) <= 5 * (np.pi / 180) and np.abs(velocity) <= 0.1:
+        return 0
     else:
-        if (np.abs(angle[0]) <= 5 * (np.pi / 180) and np.abs(velocity[0]) <= 0.1) and (np.abs(angle[1]) <= 5 * (np.pi / 180) and np.abs(velocity[1]) <= 0.1):
-            return 0
-        else:
-            return -0.5
+        return -0.5
+
 
 def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=20):
     """
@@ -179,7 +171,8 @@ def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=2
             if np.random.uniform() < eps:
                 action = np.random.choice(actions[q])
             else:
-                action = getKeysByValue(qTables[q][states], max(qTables[q][states].values()))
+                maximum = 0 if not qTables[q][states] else max(qTables[q][states].values())
+                action = getKeysByValue(qTables[q][states], maximum)
             new_actions[q] = action
         return new_actions
     else:
@@ -188,6 +181,8 @@ def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=2
         else:
             new_actions = getKeysByValue(qTables[states], max(qTables[states].values()))
         return tuple(new_actions)
+
+
 def check_states(states):
     """
     Verify if the new states belong to the discrete grid, otherwise return the closest discrete value in the grid
@@ -195,42 +190,63 @@ def check_states(states):
     :return: states in the discrete grid
     """
     angles = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 50)), decimals=2)
-    velocities = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 50)), decimals=2)
+    velocities = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 15)), decimals=2)
     angle_space = 2 / 25
-    velocity_space = 2 / 25
-    angle_index = np.abs(int(np.round(states[0] / angle_space, decimals=0)))
-    velocity_index = np.abs(int(np.round(states[1] / velocity_space, decimals=0)))
+    velocity_space = 2 / 7
+    angle_index1 = np.abs(int(np.round(states[0] / angle_space, decimals=0)))
+    angle_index2 = np.abs(int(np.round(states[1] / angle_space, decimals=0)))
+    velocity_index1 = np.abs(int(np.round(states[2] / velocity_space, decimals=0)))
+    velocity_index2 = np.abs(int(np.round(states[3] / velocity_space, decimals=0)))
     if states[0] > 0:
-        angle_index += 25
+        angle_index1 += 25
     else:
-        angle_index = 25 - angle_index
+        angle_index1 = 25 - angle_index1
+
     if states[1] > 0:
-        velocity_index += 25
+        angle_index2 += 25
     else:
-        velocity_index = 25 - velocity_index
+        angle_index2 = 25 - angle_index2
 
-    if angle_index != 50 and angle_index != 0:
-        if angle_index == 49:
-            possible_positions = [angles[angle_index - 1], angles[angle_index]]
+    if states[2] > 0:
+        velocity_index1 += 7
+    else:
+        velocity_index1 = 7 - velocity_index1
+
+    if states[3] > 0:
+        velocity_index2 += 7
+    else:
+        velocity_index2 = 7 - velocity_index2
+
+    possible_angles1 = [angles[(angle_index1 - 1) % 25], angles[angle_index1],
+                        angles[(angle_index1 + 1) % 25]]
+    possible_angles2 = [angles[(angle_index2 - 1) % 25],
+                        angles[angle_index2], angles[(angle_index2 + 1) % 25]]
+
+
+    if velocity_index1 != 50 and velocity_index1 != 0:
+        if velocity_index1 == 49:
+            possible_velocities1 = [velocities[velocity_index1 - 1], velocities[velocity_index1]]
         else:
-            possible_positions = [angles[angle_index - 1], angles[angle_index],
-                                  angles[angle_index + 1]]
-    elif angle_index == 50:
-        possible_positions = [angles[angle_index - 1], angles[angle_index - 2]]
+            possible_velocities1 = [velocities[velocity_index1 - 1], velocities[velocity_index1],
+                                    velocities[velocity_index1 + 1]]
+    elif velocity_index1 == 50:
+        possible_velocities1 = [velocities[velocity_index1 - 1], velocities[velocity_index1 - 2]]
     else:
-        possible_positions = [angles[angle_index], angles[angle_index + 1]]
+        possible_velocities1 = [velocities[velocity_index1], velocities[velocity_index1 + 1]]
 
-    if velocity_index != 50 and velocity_index != 0:
-        if velocity_index == 49:
-            possible_velocities = [velocities[velocity_index - 1], velocities[velocity_index]]
+    if velocity_index2 != 50 and velocity_index2 != 0:
+        if velocity_index2 == 49:
+            possible_velocities2 = [velocities[velocity_index2 - 1], velocities[velocity_index2]]
         else:
-            possible_velocities = [velocities[velocity_index - 1], velocities[velocity_index],
-                                   velocities[velocity_index + 1]]
-    elif velocity_index == 50:
-        possible_velocities = [velocities[velocity_index - 1], velocities[velocity_index - 2]]
+            possible_velocities2 = [velocities[velocity_index2 - 1], velocities[velocity_index2],
+                                    velocities[velocity_index2 + 1]]
+    elif velocity_index2 == 50:
+        possible_velocities2 = [velocities[velocity_index2 - 1], velocities[velocity_index2 - 2]]
     else:
-        possible_velocities = [velocities[velocity_index], velocities[velocity_index + 1]]
+        possible_velocities2 = [velocities[velocity_index2], velocities[velocity_index2 + 1]]
 
-    new_states = (min(possible_positions, key=lambda x: abs(x - states[0])),
-                  min(possible_velocities, key=lambda x: abs(x - states[1])))
+    new_states = (min(possible_angles1, key=lambda x: abs(x - states[0])),
+                  min(possible_angles2, key=lambda x: abs(x - states[1])),
+                  min(possible_velocities1, key=lambda x: abs(x - states[2])),
+                  min(possible_velocities2, key=lambda x: abs(x - states[3])))
     return new_states
