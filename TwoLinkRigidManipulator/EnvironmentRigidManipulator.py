@@ -190,9 +190,9 @@ def check_states(states):
     :return: states in the discrete grid
     """
     angles = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 50)), decimals=2)
-    velocities = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 15)), decimals=2)
-    angle_space = 2 / 25
-    velocity_space = 2 / 7
+    velocities = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 16)), decimals=2)
+    angle_space = 2 * np.pi / 25
+    velocity_space = 2 * np.pi / 8
     angle_index1 = np.abs(int(np.round(states[0] / angle_space, decimals=0)))
     angle_index2 = np.abs(int(np.round(states[1] / angle_space, decimals=0)))
     velocity_index1 = np.abs(int(np.round(states[2] / velocity_space, decimals=0)))
@@ -208,39 +208,38 @@ def check_states(states):
         angle_index2 = 25 - angle_index2
 
     if states[2] > 0:
-        velocity_index1 += 7
+        velocity_index1 += 8
     else:
-        velocity_index1 = 7 - velocity_index1
+        velocity_index1 = 8 - velocity_index1
 
     if states[3] > 0:
-        velocity_index2 += 7
+        velocity_index2 += 8
     else:
-        velocity_index2 = 7 - velocity_index2
+        velocity_index2 = 8 - velocity_index2
 
-    possible_angles1 = [angles[(angle_index1 - 1) % 25], angles[angle_index1],
-                        angles[(angle_index1 + 1) % 25]]
-    possible_angles2 = [angles[(angle_index2 - 1) % 25],
-                        angles[angle_index2], angles[(angle_index2 + 1) % 25]]
+    possible_angles1 = [angles[(angle_index1 - 1) % 50], angles[angle_index1 % 50],
+                        angles[(angle_index1 + 1) % 50]]
+    possible_angles2 = [angles[(angle_index2 - 1) % 50],
+                        angles[angle_index2 % 50], angles[(angle_index2 + 1) % 50]]
 
-
-    if velocity_index1 != 50 and velocity_index1 != 0:
-        if velocity_index1 == 49:
+    if velocity_index1 != 16 and velocity_index1 != 0:
+        if velocity_index1 == 15:
             possible_velocities1 = [velocities[velocity_index1 - 1], velocities[velocity_index1]]
         else:
             possible_velocities1 = [velocities[velocity_index1 - 1], velocities[velocity_index1],
                                     velocities[velocity_index1 + 1]]
-    elif velocity_index1 == 50:
+    elif velocity_index1 == 16:
         possible_velocities1 = [velocities[velocity_index1 - 1], velocities[velocity_index1 - 2]]
     else:
         possible_velocities1 = [velocities[velocity_index1], velocities[velocity_index1 + 1]]
 
-    if velocity_index2 != 50 and velocity_index2 != 0:
-        if velocity_index2 == 49:
+    if velocity_index2 != 16 and velocity_index2 != 0:
+        if velocity_index2 == 15:
             possible_velocities2 = [velocities[velocity_index2 - 1], velocities[velocity_index2]]
         else:
             possible_velocities2 = [velocities[velocity_index2 - 1], velocities[velocity_index2],
                                     velocities[velocity_index2 + 1]]
-    elif velocity_index2 == 50:
+    elif velocity_index2 == 16:
         possible_velocities2 = [velocities[velocity_index2 - 1], velocities[velocity_index2 - 2]]
     else:
         possible_velocities2 = [velocities[velocity_index2], velocities[velocity_index2 + 1]]

@@ -16,8 +16,8 @@ def trainHysteretic():
     qTable2 = defaultdict(lambda: defaultdict(float))
     qTables = [qTable1, qTable2]
 
-    tau1 = np.round(list(np.linspace(-0.2, 0.2, 15)), decimals=2)
-    tau2 = np.round(list(np.linspace(-0.1, 0.1, 15)), decimals=2)
+    tau1 = np.round(list(np.linspace(-0.2, 0.2, 16)), decimals=2)
+    tau2 = np.round(list(np.linspace(-0.1, 0.1, 16)), decimals=2)
     actions = [tau1, tau2]
     output20 = []
     for i in range(1):
@@ -67,8 +67,8 @@ def trainCentralized():
 
     # generate Q-Table
     qTable = generateQTables(centralized=True)
-    tau1 = np.round(list(np.linspace(-0.2, 0.2, 50)), decimals=2)
-    tau2 = np.round(list(np.linspace(-0.1, 0.1, 50)), decimals=2)
+    tau1 = np.round(list(np.linspace(-0.2, 0.2, 16)), decimals=2)
+    tau2 = np.round(list(np.linspace(-0.1, 0.1, 16)), decimals=2)
     actions = [tau1, tau2]
     output20 = []
     for i in range(1):
