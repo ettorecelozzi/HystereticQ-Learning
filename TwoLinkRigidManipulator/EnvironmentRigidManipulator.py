@@ -1,4 +1,5 @@
 import numpy as np
+from Utility import *
 
 g = 9.81
 l1 = l2 = 0.1
@@ -82,7 +83,7 @@ def getNextTheta1States(tau1, tau2, theta1, theta2, t, v1):
     a1 = dynamictheta1(tau1, tau2, theta2, v1)
     new_theta1 = theta1 + t * v1
     new_v1 = v1 + t * a1
-    return [new_theta1, new_v1]
+    return new_theta1, new_v1
 
 
 def getNextTheta2States(theta2, t, tau2, v2):
@@ -97,7 +98,7 @@ def getNextTheta2States(theta2, t, tau2, v2):
     a2 = dynamictheta2(tau2, v2)
     new_theta2 = theta2 + t * v2
     new_v2 = v2 + t * a2
-    return [new_theta2, new_v2]
+    return new_theta2, new_v2
 
 
 def generateQTables(centralized=False):
@@ -106,10 +107,10 @@ def generateQTables(centralized=False):
     :param centralized:
     :return:
     """
-    angles = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 50)))
-    speeds = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 50)))
-    tau1 = np.round(list(np.linspace(-0.2, 0.2, 50)))
-    tau2 = np.round(list(np.linspace(-0.1, 0.1, 50)))
+    angles = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 50)), decimals=2)
+    speeds = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 50)), decimals=2)
+    tau1 = np.round(list(np.linspace(-0.2, 0.2, 50)), decimals=2)
+    tau2 = np.round(list(np.linspace(-0.1, 0.1, 50)), decimals=2)
     if centralized is False:
         qTable1 = {}
         qTable2 = {}
@@ -122,6 +123,7 @@ def generateQTables(centralized=False):
                         for t2 in tau2:
                             qTable1[(ang1, ang2, spd)][(t1, t2)] = 0.0
                             qTable2[(ang2, spd)][t2] = 0.0
+        return [qTable1, qTable2]
     else:
         qTable = {}
         for ang1 in angles:  # theta1
@@ -133,3 +135,39 @@ def generateQTables(centralized=False):
                             for t2 in tau2:
                                 qTable[(ang1, ang2, spd1, spd2)][(t1, t2)] = 0.0
         return qTable
+
+
+def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=20):
+    """
+    Select next action balancing exploration and exploitation
+    :param states: actual states
+    :param actions: list of actions available
+    :param qTables: QTable
+    :param centralized: boolean variable to manage the centralized case
+    :param trial: number of the trial (Total 5000)
+    :param numOfEps: number of Epsilon. Epsilons are used to adopt exploration/exploitation
+    :return: the new actions to perform
+    """
+    if numOfEps > 0:
+        epsilons = np.linspace(0.9, 0.1, numOfEps)
+        index = int(trial // (5000 / numOfEps))
+        eps = epsilons[index]
+    else:
+        eps = 0.1
+
+    if centralized is False:
+        numberOfAgents = len(qTables)
+        new_actions = [0] * numberOfAgents
+        for q in range(len(qTables)):
+            if np.random.uniform() < eps:
+                action = np.random.choice(actions[q])
+            else:
+                action = getKeysByValue(qTables[q][states], max(qTables[q][states].values()))
+            new_actions[q] = action
+        return new_actions
+    else:
+        if np.random.uniform() < eps:
+            new_actions = [np.random.choice(actions[0]), np.random.choice(actions[1])]  # [tau1,tau2]
+        else:
+            new_actions = getKeysByValue(qTables[states], max(qTables[states].values()))
+        return tuple(new_actions)

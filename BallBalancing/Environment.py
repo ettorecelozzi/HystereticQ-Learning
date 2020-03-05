@@ -1,4 +1,5 @@
 import numpy as np
+from Utility import *
 
 
 def generateQTable(centralized=False):
@@ -127,19 +128,6 @@ def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=2
         else:
             new_actions = getKeysByValue(qTables[states], max(qTables[states].values()))
         return tuple(new_actions)
-
-
-def getKeysByValue(dictOfElements, valueToFind):
-    """
-
-    :param dictOfElements:
-    :param valueToFind:
-    :return:
-    """
-    listOfItems = dictOfElements.items()
-    for item in listOfItems:
-        if item[1] == valueToFind:
-            return item[0]
 
 
 def check_states(states):

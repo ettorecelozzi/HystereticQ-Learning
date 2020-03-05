@@ -1,6 +1,19 @@
 import numpy as np
 
 
+def getKeysByValue(dictOfElements, valueToFind):
+    """
+
+    :param dictOfElements:
+    :param valueToFind:
+    :return:
+    """
+    listOfItems = dictOfElements.items()
+    for item in listOfItems:
+        if item[1] == valueToFind:
+            return item[0]
+
+
 def countNot0(qTables):
     """
     Count the number of element that are not 0 in the QTables
