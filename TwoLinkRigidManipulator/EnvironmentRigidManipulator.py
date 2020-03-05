@@ -106,8 +106,30 @@ def generateQTables(centralized=False):
     :param centralized:
     :return:
     """
-    dict = {}
     angles = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 50)))
     speeds = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 50)))
     tau1 = np.round(list(np.linspace(-0.2, 0.2, 50)))
     tau2 = np.round(list(np.linspace(-0.1, 0.1, 50)))
+    if centralized is False:
+        qTable1 = {}
+        qTable2 = {}
+        for ang1 in angles:  # theta1
+            for ang2 in angles:  # theta2
+                for spd in speeds:
+                    qTable2[(ang2, spd)] = {}
+                    qTable1[(ang1, ang2, spd)] = {}
+                    for t1 in tau1:
+                        for t2 in tau2:
+                            qTable1[(ang1, ang2, spd)][(t1, t2)] = 0.0
+                            qTable2[(ang2, spd)][t2] = 0.0
+    else:
+        qTable = {}
+        for ang1 in angles:  # theta1
+            for ang2 in angles:  # theta2
+                for spd1 in speeds:  # speed1
+                    for spd2 in speeds:  # speed2
+                        qTable[(ang1, ang2, spd1, spd2)] = {}
+                        for t1 in tau1:
+                            for t2 in tau2:
+                                qTable[(ang1, ang2, spd1, spd2)][(t1, t2)] = 0.0
+        return qTable
