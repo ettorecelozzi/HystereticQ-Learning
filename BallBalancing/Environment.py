@@ -94,7 +94,7 @@ def getNextStates(h1, h2, v, t, x_0, v_0):
     return xnew, vnew
 
 
-def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=20):
+def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=40):
     """
     Select next action balancing exploration and exploitation
     :param states: actual states
@@ -105,25 +105,26 @@ def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=2
     :param numOfEps: number of Epsilon. Epsilons are used to adopt exploration/exploitation
     :return: the new actions to perform
     """
-    if numOfEps > 0:
-        epsilons = np.linspace(0.9, 0.1, numOfEps)
+
+    if trial is not None and numOfEps > 0:
+        epsilons = np.linspace(0.8, 0.1, numOfEps)
         index = int(trial // (5000 / numOfEps))
         eps = epsilons[index]
     else:
-        eps = 0.2
+        eps = 0.1
 
     if centralized is False:
         numberOfAgents = len(qTables)
         new_actions = [0] * numberOfAgents
         for q in range(len(qTables)):
-            if np.random.uniform() < eps:
+            if actions is not None and np.random.uniform() < eps:
                 action = np.random.choice(actions)
             else:
                 action = getKeysByValue(qTables[q][states], max(qTables[q][states].values()))
             new_actions[q] = action
         return new_actions
     else:
-        if np.random.uniform() < eps:
+        if actions is not None and np.random.uniform() < eps:
             new_actions = [np.random.choice(actions), np.random.choice(actions)]
         else:
             new_actions = getKeysByValue(qTables[states], max(qTables[states].values()))
