@@ -126,8 +126,6 @@ def trainHysteretic():
             printProgressBar(trial, 5000, prefix='Iteration: ' + str(i))
             states = (0.49, 0.06)  # initial states
             rewardSum = 0
-            xs = []
-            vs = []
 
             for t in np.arange(0, 20, samplingTime):
 
@@ -141,10 +139,6 @@ def trainHysteretic():
                 if v > 3: v = 3
                 if v < -3: v = -3
 
-                if trial > 4500:
-                    xs.append(x)
-                    vs.append(v)
-
                 if np.abs(x) > 1: break
 
                 r = reward(states[0], states[1])
@@ -155,14 +149,6 @@ def trainHysteretic():
 
                 qTables = hysteretic(qTables, states, new_actions, alpha, beta, r, gamma, new_states)
                 states = new_states
-
-            if trial > 4500:
-                plt.scatter(range(len(xs)), xs)
-                plt.savefig("./Plots/Space/space" + str(trial))
-                plt.clf()
-                plt.scatter(range(len(vs)), vs)
-                plt.savefig("./Plots/Speed/speed" + str(trial))
-                plt.clf()
 
             output.append(rewardSum)
         output20.append(output)

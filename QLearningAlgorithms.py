@@ -28,8 +28,9 @@ def centralized(states, actions, r, gamma, alpha, qTable, new_states):
     new_states: new states
     :return: qTable updated
     """
+    maximum = 0 if not qTable[new_states] else max(qTable[new_states].values())
     qTable[states][actions] = \
-        (1 - alpha) * qTable[states][actions] + alpha * (r + gamma * (max(qTable[new_states].values())))
+        (1 - alpha) * qTable[states][actions] + alpha * (r + gamma * maximum)
     return qTable
 
 
@@ -46,7 +47,8 @@ def decentralized(qTables, states, actions, alpha, r, gamma, new_states):
     :return: list of qTables updated
     """
     for a, q in zip(actions, qTables):
-        q[states][a] = (1 - alpha) * q[states][a] + alpha * (r + gamma * max(q[new_states].values()))
+        maximum = 0 if not q[new_states] else max(q[new_states].values())
+        q[states][a] = (1 - alpha) * q[states][a] + alpha * (r + gamma * maximum)
     return qTables
 
 

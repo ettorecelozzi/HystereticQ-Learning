@@ -136,8 +136,8 @@ def generateQTables(centralized=False):
 def reward(angle, velocity):
     """
     Reward function
-    :param x: first state (space)
-    :param v: second state (derivate of the state (speed))
+    :param angle: first state (space)
+    :param velocity: second state (derivate of the state (speed))
     :return: the reward with respect of the states
     """
     if np.abs(angle) <= 5 * (np.pi / 180) and np.abs(velocity) <= 0.1:
@@ -146,7 +146,21 @@ def reward(angle, velocity):
         return -0.5
 
 
-def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=20):
+def rewardCentralized(angles, velocities):
+    """
+    Reward function for the centralized case
+    :param angles: angles states
+    :param velocities: velocities states
+    :return: reward of the states
+    """
+    if np.abs(angles[0]) <= 5 * (np.pi / 180) and np.abs(angles[1]) <= 5 * (np.pi / 180) \
+            and np.abs(velocities[0]) <= 0.1 and np.abs(velocities[1]) <= 0.1:
+        return 0
+    else:
+        return -0.5
+
+
+def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=40):
     """
     Select next action balancing exploration and exploitation
     :param states: actual states
@@ -157,8 +171,8 @@ def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=2
     :param numOfEps: number of Epsilon. Epsilons are used to adopt exploration/exploitation
     :return: the new actions to perform
     """
-    if numOfEps > 0:
-        epsilons = np.linspace(0.9, 0.1, numOfEps)
+    if trial is not None and numOfEps > 0:
+        epsilons = np.linspace(0.8, 0.1, numOfEps)
         index = int(trial // (5000 / numOfEps))
         eps = epsilons[index]
     else:
@@ -168,7 +182,7 @@ def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=2
         numberOfAgents = len(qTables)
         new_actions = [0] * numberOfAgents
         for q in range(len(qTables)):
-            if np.random.uniform() < eps:
+            if actions is not None and np.random.uniform() < eps:
                 action = np.random.choice(actions[q])
             else:
                 maximum = 0 if not qTables[q][states] else max(qTables[q][states].values())
@@ -176,10 +190,11 @@ def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=2
             new_actions[q] = action
         return new_actions
     else:
-        if np.random.uniform() < eps:
+        if actions is not None and np.random.uniform() < eps:
             new_actions = [np.random.choice(actions[0]), np.random.choice(actions[1])]  # [tau1,tau2]
         else:
-            new_actions = getKeysByValue(qTables[states], max(qTables[states].values()))
+            maximum = 0.0 if not qTables[states] else max(qTables[states].values())
+            new_actions = getKeysByValue(qTables[states], maximum, centralized)
         return tuple(new_actions)
 
 

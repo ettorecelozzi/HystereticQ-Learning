@@ -3,20 +3,18 @@ import matplotlib.pyplot as plt
 import pickle as pkl
 
 
-def testBallBalancing(qTables):
+def testBallBalancing(qTables, algorithm, centralized=False):
     """
     Play the game! Verify how much the robots have learnt.
     :param qTables: trained Q-Tables
+    :param algorithm: Q-Algorithm used
     """
-    # allSpaces = np.round(list(np.linspace(-1, 1, 100)), decimals=2)
-    # allSpeeds = np.round(list(np.linspace(-3, 3, 50)), decimals=2)
     outputSpace, outputSpeed = [], []
     states = (0.49, 0.06)  # initial states
     outputSpace.append(states[0])
     outputSpeed.append(states[1])
     for i in range(30):  # infinite game loop
-        # states = (np.random.choice(allSpaces), np.random.choice(allSpeeds))  # random initial state
-        actions = choose_action(states, None, qTables, None)
+        actions = choose_action(states, None, qTables, None, centralized)
         x, v = getNextStates(h1=actions[0], h2=actions[1], v=states[1], t=0.03, x_0=states[0], v_0=states[1])
         outputSpace.append(x)
         outputSpeed.append(v)
@@ -27,11 +25,20 @@ def testBallBalancing(qTables):
     plt.plot(outputSpace, '-', label="Space")
     plt.plot(outputSpeed, '-', label="Speed")
     plt.legend()
-    plt.show()
+    plt.title(algorithm)
+    plt.savefig('./Plots/' + algorithm + '_test.png')
+    plt.clf()
 
 
-algorithm = 'hysteretic'
-qTable1 = pkl.load(open('./QTables/qT1_' + algorithm + '.p', 'rb'))
-qTable2 = pkl.load(open('./QTables/qT2_' + algorithm + '.p', 'rb'))
-qTables = [qTable1, qTable2]
-testBallBalancing(qTables)
+for algorithm in ['Distributed', 'Decentralized', 'Hysteretic']:
+    with open('./QTables/qT1_' + algorithm + '.p', 'rb') as file:
+        qTable1 = pkl.load(file)
+    with open('./QTables/qT2_' + algorithm + '.p', 'rb') as file:
+        qTable2 = pkl.load(file)
+    qTables = [qTable1, qTable2]
+    testBallBalancing(qTables, algorithm)
+
+algorithm = 'Centralized'
+with open('./QTables/qT_' + algorithm + '.p', 'rb') as file:
+    qTable = pkl.load(file)
+testBallBalancing(qTable, algorithm, centralized=True)

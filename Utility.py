@@ -1,7 +1,13 @@
 import numpy as np
+from collections import defaultdict
 
 
-def getKeysByValue(dictOfElements, valueToFind):
+def floatDD():
+    """Utility function created to use pickle with defaultdict"""
+    return defaultdict(float)
+
+
+def getKeysByValue(dictOfElements, valueToFind, centralized=False):
     """
 
     :param dictOfElements:
@@ -14,7 +20,10 @@ def getKeysByValue(dictOfElements, valueToFind):
             if item[1] == valueToFind:
                 return item[0]
     else:
-        return 0
+        if centralized is False:
+            return 0
+        else:
+            return 0, 0
 
 
 def countNot0(qTables):
