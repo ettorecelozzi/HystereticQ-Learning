@@ -82,10 +82,10 @@ def getNextTheta1States(tau1, tau2, theta1, theta2, t, v1):
     """
     a1 = dynamictheta1(tau1, tau2, theta2, v1)
     new_theta1 = (theta1 + t * v1)
-    # if new_theta1 < -2 * np.pi:
-    #     new_theta1 = (2 * np.pi) - ((-new_theta1) % (2 * np.pi))
-    # elif new_theta1 > 2 * np.pi:
-    #     new_theta1 = -(2 * np.pi) + (new_theta1 % (2 * np.pi))
+    if new_theta1 < -2 * np.pi:
+        new_theta1 = (2 * np.pi) - ((-new_theta1) % (2 * np.pi))
+    elif new_theta1 > 2 * np.pi:
+        new_theta1 = -(2 * np.pi) + (new_theta1 % (2 * np.pi))
     new_v1 = v1 + t * a1
     return new_theta1, new_v1
 
@@ -101,10 +101,10 @@ def getNextTheta2States(theta2, t, tau2, v2):
     """
     a2 = dynamictheta2(tau2, v2)
     new_theta2 = (theta2 + t * v2)
-    # if new_theta2 < -2 * np.pi:
-    #     new_theta2 = (2 * np.pi) - ((-new_theta2) % (2 * np.pi))
-    # elif new_theta2 > 2 * np.pi:
-    #     new_theta2 = -(2 * np.pi) + (new_theta2 % (2 * np.pi))
+    if new_theta2 < -2 * np.pi:
+        new_theta2 = (2 * np.pi) - ((-new_theta2) % (2 * np.pi))
+    elif new_theta2 > 2 * np.pi:
+        new_theta2 = -(2 * np.pi) + (new_theta2 % (2 * np.pi))
     new_v2 = v2 + t * a2
     return new_theta2, new_v2
 
