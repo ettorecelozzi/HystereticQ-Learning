@@ -46,9 +46,11 @@ def decentralized(qTables, states, actions, alpha, r, gamma, new_states):
     new_states: new states
     :return: list of qTables updated
     """
+    k = 0
     for a, q in zip(actions, qTables):
         maximum = 0 if not q[new_states] else max(q[new_states].values())
-        q[states][a] = (1 - alpha) * q[states][a] + alpha * (r + gamma * maximum)
+        q[states][a] = (1 - alpha) * q[states][a] + alpha * (r[k] + gamma * maximum)
+        k+=1
     return qTables
 
 

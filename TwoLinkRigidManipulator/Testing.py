@@ -17,7 +17,7 @@ def testTwoLinkRigidManipulator(qTables, algorithm, centralized=False):
     outputAngle2.append(states[1])
     outputSpeed1.append(states[2])
     outputSpeed2.append(states[3])
-    for i in range(300):
+    for i in range(500):
         actions = choose_action(states, None, qTables, None, centralized)
         if i >20:
             a=1

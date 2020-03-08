@@ -77,7 +77,7 @@ def trainDecentralized():
 
             r1 = reward(states[0], states[2])
             r2 = reward(states[1], states[3])
-            r = r1 + r2
+            r = [r1, r2]
 
             new_states = (theta1, theta2, v1, v2)
             new_states = check_states(new_states)
@@ -114,8 +114,8 @@ def trainHysteretic():
             if v1 < -2 * np.pi: v1 = -2 * np.pi
             if v2 < -2 * np.pi: v2 = -2 * np.pi
 
-            r1 = reward(states[0], states[2])
-            r2 = reward(states[1], states[3])
+            r1 = rewardTest(states[0], states[2])
+            r2 = rewardTest(states[1], states[3])
             r = [r1, r2]
 
             new_states = (theta1, theta2, v1, v2)
@@ -151,7 +151,7 @@ def trainCentralized():
             if v1 < -2 * np.pi: v1 = -2 * np.pi
             if v2 < -2 * np.pi: v2 = -2 * np.pi
 
-            r = rewardTest(states)
+            r = rewardCentralized([states[0],states[1]],[states[2],states[3]])
 
             new_states = (theta1, theta2, v1, v2)
             new_states = check_states(new_states)
