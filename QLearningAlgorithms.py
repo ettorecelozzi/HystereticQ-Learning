@@ -65,11 +65,13 @@ def hysteretic(qTables, states, actions, alpha, beta, r, gamma, new_states):
     new_states: new states
     :return: list of qTables updated
     """
+    k=0
     for a, q in zip(actions, qTables):
         maximum = 0 if not q[new_states] else max(q[new_states].values())
-        delta = r + gamma * maximum - q[states][a]
+        delta = r[k] + gamma * maximum - q[states][a]
         if delta >= 0:
             q[states][a] += delta * alpha
         else:
             q[states][a] += delta * beta
+        k += 1
     return qTables

@@ -2,6 +2,7 @@ from TwoLinkRigidManipulator.EnvironmentRigidManipulator import *
 from Utility import *
 from QLearningAlgorithms import *
 import pandas as pd
+import matplotlib.pyplot as plt
 from collections import defaultdict
 import pickle as pkl
 
@@ -33,8 +34,8 @@ def trainDistributed():
 
             if v1 > 2 * np.pi: v1 = 2 * np.pi
             if v2 > 2 * np.pi: v2 = 2 * np.pi
-            if v1 < -2 * np.pi: v1 = 2 * np.pi
-            if v2 < -2 * np.pi: v2 = 2 * np.pi
+            if v1 < -2 * np.pi: v1 = -2 * np.pi
+            if v2 < -2 * np.pi: v2 = -2 * np.pi
 
             r1 = reward(states[0], states[2])
             r2 = reward(states[1], states[3])
@@ -71,8 +72,8 @@ def trainDecentralized():
 
             if v1 > 2 * np.pi: v1 = 2 * np.pi
             if v2 > 2 * np.pi: v2 = 2 * np.pi
-            if v1 < -2 * np.pi: v1 = 2 * np.pi
-            if v2 < -2 * np.pi: v2 = 2 * np.pi
+            if v1 < -2 * np.pi: v1 = -2 * np.pi
+            if v2 < -2 * np.pi: v2 = -2 * np.pi
 
             r1 = reward(states[0], states[2])
             r2 = reward(states[1], states[3])
@@ -97,12 +98,12 @@ def trainHysteretic():
     qTable1 = defaultdict(floatDD)
     qTable2 = defaultdict(floatDD)
     qTables = [qTable1, qTable2]
-
-    for trial in range(5000):
-        printProgressBar(trial, 5000, prefix='Hysteretic: ')
+    trials = 5000
+    for trial in range(trials):
+        printProgressBar(trial, trials, prefix='Hysteretic: ')
         states = (-1.15, -3.2, 0, 0)
         for t in np.arange(0, 20, 0.03):
-            new_actions = choose_action(states, actions, qTables, trial)
+            new_actions = choose_action(states, actions, qTables, trial, trials=trials)
 
             theta1, v1 = getNextTheta1States(tau1=new_actions[0], tau2=new_actions[1], theta1=states[0],
                                              theta2=states[1], v1=states[2], t=0.03)
@@ -110,12 +111,12 @@ def trainHysteretic():
 
             if v1 > 2 * np.pi: v1 = 2 * np.pi
             if v2 > 2 * np.pi: v2 = 2 * np.pi
-            if v1 < -2 * np.pi: v1 = 2 * np.pi
-            if v2 < -2 * np.pi: v2 = 2 * np.pi
+            if v1 < -2 * np.pi: v1 = -2 * np.pi
+            if v2 < -2 * np.pi: v2 = -2 * np.pi
 
             r1 = reward(states[0], states[2])
             r2 = reward(states[1], states[3])
-            r = r1 + r2
+            r = [r1, r2]
 
             new_states = (theta1, theta2, v1, v2)
             new_states = check_states(new_states)
@@ -134,11 +135,12 @@ def trainHysteretic():
 def trainCentralized():
     # generate Q-Table
     qTable = defaultdict(floatDD)
-    for trial in range(5000):
+    trials = 5000
+    for trial in range(trials):
         states = (-1.15, -3.2, 0, 0)
-        printProgressBar(trial, 5000, prefix='Centralized: ')
+        printProgressBar(trial, trials, prefix='Centralized: ')
         for t in np.arange(0, 20, 0.03):
-            new_actions = choose_action(states, actions, qTable, trial, centralized=True)
+            new_actions = choose_action(states, actions, qTable, trial, centralized=True, trials=trials)
 
             theta1, v1 = getNextTheta1States(tau1=new_actions[0], tau2=new_actions[1], theta1=states[0],
                                              theta2=states[1], v1=states[2], t=0.03)
@@ -146,10 +148,10 @@ def trainCentralized():
 
             if v1 > 2 * np.pi: v1 = 2 * np.pi
             if v2 > 2 * np.pi: v2 = 2 * np.pi
-            if v1 < -2 * np.pi: v1 = 2 * np.pi
-            if v2 < -2 * np.pi: v2 = 2 * np.pi
+            if v1 < -2 * np.pi: v1 = -2 * np.pi
+            if v2 < -2 * np.pi: v2 = -2 * np.pi
 
-            r = rewardCentralized([states[0], states[2]], [states[1], states[3]])
+            r = rewardTest(states)
 
             new_states = (theta1, theta2, v1, v2)
             new_states = check_states(new_states)
@@ -163,7 +165,7 @@ def trainCentralized():
     pd.DataFrame.from_dict(qTable, orient='index').to_csv('./QTables/qT_Centralized.csv')
 
 
-trainDistributed()
-trainDecentralized()
-trainHysteretic()
+# trainDistributed()
+# trainDecentralized()
+# trainHysteretic()
 trainCentralized()

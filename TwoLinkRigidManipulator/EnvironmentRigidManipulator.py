@@ -64,7 +64,7 @@ def dynamictheta2(tau2, v2):
     :param v2:
     :return:
     """
-    a2 = tau2 / p2 - b2 * v2
+    a2 = (tau2 / p2) - (b2 * v2)
     return a2
 
 
@@ -106,10 +106,10 @@ def generateQTables(centralized=False):
     :param centralized:
     :return:
     """
-    angles = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 50)), decimals=2)
-    speeds = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 50)), decimals=2)
-    tau1 = np.round(list(np.linspace(-0.2, 0.2, 50)), decimals=2)
-    tau2 = np.round(list(np.linspace(-0.1, 0.1, 50)), decimals=2)
+    angles = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 100)), decimals=2)
+    speeds = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 100)), decimals=2)
+    tau1 = np.round(list(np.linspace(-0.2, 0.2, 100)), decimals=2)
+    tau2 = np.round(list(np.linspace(-0.1, 0.1, 100)), decimals=2)
     if centralized is False:
         qTable = {}
         for ang1 in angles:  # theta1
@@ -155,12 +155,20 @@ def rewardCentralized(angles, velocities):
     """
     if np.abs(angles[0]) <= 5 * (np.pi / 180) and np.abs(angles[1]) <= 5 * (np.pi / 180) \
             and np.abs(velocities[0]) <= 0.1 and np.abs(velocities[1]) <= 0.1:
-        return 0
+        return 1
     else:
-        return -0.5
+        return 0
 
+def rewardTest(states):
+    """
+    Reward function
+    :param x: first state (space)
+    :param v: second state (derivate of the state (speed))
+    :return: the reward with respect of the states
+    """
+    return 0.7 * np.exp(-(np.power(states[1], 2))) + 0.3 * np.exp(-(np.power(states[3], 2)))
 
-def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=40):
+def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=40, trials=5000):
     """
     Select next action balancing exploration and exploitation
     :param states: actual states
@@ -173,7 +181,7 @@ def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=4
     """
     if trial is not None and numOfEps > 0:
         epsilons = np.linspace(0.8, 0.1, numOfEps)
-        index = int(trial // (5000 / numOfEps))
+        index = int(trial // (trials / numOfEps))
         eps = epsilons[index]
     else:
         eps = 0.1
@@ -204,57 +212,84 @@ def check_states(states):
     :param states: float states
     :return: states in the discrete grid
     """
-    angles = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 50)), decimals=2)
-    velocities = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 16)), decimals=2)
-    angle_space = 2 * np.pi / 25
-    velocity_space = 2 * np.pi / 8
+    states = list(states)
+    if states[0] > 2 * np.pi: states[0] = 2 * np.pi
+    if states[1] > 2 * np.pi: states[1] = 2 * np.pi
+
+    dim1 = 100
+    dim2 = 100
+    angles = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, dim1)), decimals=2)
+    velocities = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, dim2)), decimals=2)
+    angle_space = 2 * np.pi / (dim1//2)
+    velocity_space = 2 * np.pi / (dim2//2)
     angle_index1 = np.abs(int(np.round(states[0] / angle_space, decimals=0)))
     angle_index2 = np.abs(int(np.round(states[1] / angle_space, decimals=0)))
     velocity_index1 = np.abs(int(np.round(states[2] / velocity_space, decimals=0)))
     velocity_index2 = np.abs(int(np.round(states[3] / velocity_space, decimals=0)))
     if states[0] > 0:
-        angle_index1 += 25
+        angle_index1 += (dim1//2)
     else:
-        angle_index1 = 25 - angle_index1
+        angle_index1 = (dim1//2) - angle_index1
 
     if states[1] > 0:
-        angle_index2 += 25
+        angle_index2 += (dim1//2)
     else:
-        angle_index2 = 25 - angle_index2
+        angle_index2 = (dim1//2) - angle_index2
 
     if states[2] > 0:
-        velocity_index1 += 8
+        velocity_index1 += (dim2//2)
     else:
-        velocity_index1 = 8 - velocity_index1
+        velocity_index1 = (dim2//2) - velocity_index1
 
     if states[3] > 0:
-        velocity_index2 += 8
+        velocity_index2 += (dim2//2)
     else:
-        velocity_index2 = 8 - velocity_index2
-
-    possible_angles1 = [angles[(angle_index1 - 1) % 50], angles[angle_index1 % 50],
-                        angles[(angle_index1 + 1) % 50]]
-    possible_angles2 = [angles[(angle_index2 - 1) % 50],
-                        angles[angle_index2 % 50], angles[(angle_index2 + 1) % 50]]
-
-    if velocity_index1 != 16 and velocity_index1 != 0:
-        if velocity_index1 == 15:
+        velocity_index2 = (dim2//2) - velocity_index2
+    ##### P1 #####
+    # if angle_index1 != dim1 and angle_index1 != 0:
+    #     if angle_index1 == (dim1-1):
+    #         possible_angles1 = [angles[angle_index1 - 1], angles[angle_index1]]
+    #     else:
+    #         possible_angles1 = [angles[angle_index1 - 1], angles[angle_index1],
+    #                                 angles[angle_index1 + 1]]
+    # elif angle_index1 == dim1:
+    #     possible_angles1 = [angles[angle_index1 - 1], angles[angle_index1 - 2]]
+    # else:
+    #     possible_angles1 = [angles[angle_index1], angles[angle_index1 + 1]]
+    possible_angles1 = [angles[(angle_index1 - 1) % (dim1//2)], angles[angle_index1 % (dim1//2)],
+                        angles[(angle_index1 + 1) % (dim1//2)]]
+    ##### P2 #####
+    # if angle_index2 != dim1 and angle_index2 != 0:
+    #     if angle_index2 == (dim1-1):
+    #         possible_angles2 = [angles[angle_index2 - 1], angles[angle_index2]]
+    #     else:
+    #         possible_angles2 = [angles[angle_index2 - 1], angles[angle_index2],
+    #                                 angles[angle_index2 + 1]]
+    # elif angle_index2 == dim1:
+    #     possible_angles2 = [angles[angle_index2 - 1], angles[angle_index2 - 2]]
+    # else:
+    #     possible_angles2 = [angles[angle_index2], angles[angle_index2 + 1]]
+    possible_angles2 = [angles[(angle_index2 - 1) % (dim1//2)],
+                        angles[angle_index2 % (dim1//2)], angles[(angle_index2 + 1) % (dim1//2)]]
+    ##### V1 #####
+    if velocity_index1 != dim2 and velocity_index1 != 0:
+        if velocity_index1 == (dim2-1):
             possible_velocities1 = [velocities[velocity_index1 - 1], velocities[velocity_index1]]
         else:
             possible_velocities1 = [velocities[velocity_index1 - 1], velocities[velocity_index1],
                                     velocities[velocity_index1 + 1]]
-    elif velocity_index1 == 16:
+    elif velocity_index1 == dim2:
         possible_velocities1 = [velocities[velocity_index1 - 1], velocities[velocity_index1 - 2]]
     else:
         possible_velocities1 = [velocities[velocity_index1], velocities[velocity_index1 + 1]]
-
-    if velocity_index2 != 16 and velocity_index2 != 0:
-        if velocity_index2 == 15:
+    ##### V2 #####
+    if velocity_index2 != dim2 and velocity_index2 != 0:
+        if velocity_index2 == (dim2-1):
             possible_velocities2 = [velocities[velocity_index2 - 1], velocities[velocity_index2]]
         else:
             possible_velocities2 = [velocities[velocity_index2 - 1], velocities[velocity_index2],
                                     velocities[velocity_index2 + 1]]
-    elif velocity_index2 == 16:
+    elif velocity_index2 == dim2:
         possible_velocities2 = [velocities[velocity_index2 - 1], velocities[velocity_index2 - 2]]
     else:
         possible_velocities2 = [velocities[velocity_index2], velocities[velocity_index2 + 1]]
