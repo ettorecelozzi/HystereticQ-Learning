@@ -35,12 +35,41 @@ def coriolisMatrix(theta, theta_point):
     return m
 
 
-def centrifugalMatrix(theta):
+def gravityVector(theta):
     m = np.zeros(shape=(2, 1))
     m[0][0] = -g1 * np.sin(theta[0]) - g2 * np.sin((theta[0] + theta[1]))
     m[1][0] = -g2 * np.sin((theta[0] + theta[1]))
     return m
 
+def dynamic(thetas, speeds, taus):
+    """
+    4th order dynamic without assumptions like gravity=0 etc.
+    :param thetas: matrix of the angles. shape=(2x1)
+    :param speeds: matrix of the speeds. shape=(2x1)
+    :param taus: matrix of the actions. shape=(2x1)
+    :return: angles accelaration. shape=(1x2)
+    """
+    cc = coriolisMatrix(thetas, speeds)
+    g = gravityVector(thetas)
+    m = massMatrix(thetas)
+    num = np.transpose(taus - np.dot(cc, thetas) + g)
+    ret = np.dot(num, np.linalg.inv(m))
+    return ret.flatten()
+
+def getNexstates(thetas, speeds, taus):
+    """
+    Compute the new states given the previous states and the actions
+    :param thetas: matrix of the angles. shape=(2x1)
+    :param speeds: matrix of the speeds. shape=(2x1)
+    :param taus: matrix of the actions. shape=(2x1)
+    :return: new states: theta1, theta2, v1, v2
+    """
+    a = dynamic(thetas, speeds, taus)
+    new_theta1 = thetas[0] + 0.03 * speeds[0]
+    new_v1 = speeds[0] + 0.03 * a[0]
+    new_theta2 = thetas[1] + 0.03 * speeds[1]
+    new_v2 = speeds[1] + 0.03 * a[1]
+    return new_theta1, new_theta2, new_v1, new_v2
 
 def dynamictheta1(tau1, tau2, theta2, v1):
     """

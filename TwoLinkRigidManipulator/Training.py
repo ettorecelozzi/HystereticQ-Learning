@@ -144,7 +144,9 @@ def trainCentralized():
         printProgressBar(trial, trials, prefix='Centralized: ')
         for t in np.arange(0, 10, 0.03):
             new_actions = choose_action(states, actions, qTable, trial, centralized=True, trials=trials)
-
+            # theta1, theta2, v1, v2 = getNexstates(np.array([[states[0]], [states[1]]]),
+            #                                       np.array([[states[2]], [states[3]]]),
+            #                                       np.array([[new_actions[0]], [new_actions[1]]]))
             theta1, v1 = getNextTheta1States(tau1=new_actions[0], tau2=new_actions[1], theta1=states[0],
                                              theta2=states[1], v1=states[2], t=0.03)
             theta2, v2 = getNextTheta2States(theta2=states[1], t=samplingTime, tau2=new_actions[1], v2=states[3])
@@ -169,7 +171,7 @@ def trainCentralized():
     pd.DataFrame.from_dict(qTable, orient='index').to_csv('./QTables/qT_Centralized.csv')
 
 
-trainDistributed()
-trainDecentralized()
-trainHysteretic()
+# trainDistributed()
+# trainDecentralized()
+# trainHysteretic()
 trainCentralized()

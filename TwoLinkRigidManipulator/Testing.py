@@ -48,14 +48,14 @@ def testTwoLinkRigidManipulator(qTables, algorithm, centralized=False):
     plt.savefig('./Plots/' + algorithm + '_test.png')
     plt.clf()
 
-
-for algorithm in ['Distributed','Decentralized','Hysteretic']:
-    with open('./QTables/qT1_' + algorithm + '.p', 'rb') as file:
-        qTable1 = pkl.load(file)
-    with open('./QTables/qT2_' + algorithm + '.p', 'rb') as file:
-        qTable2 = pkl.load(file)
-    qTables = [qTable1, qTable2]
-    testTwoLinkRigidManipulator(qTables, algorithm)
+#
+# for algorithm in ['Distributed','Decentralized','Hysteretic']:
+#     with open('./QTables/qT1_' + algorithm + '.p', 'rb') as file:
+#         qTable1 = pkl.load(file)
+#     with open('./QTables/qT2_' + algorithm + '.p', 'rb') as file:
+#         qTable2 = pkl.load(file)
+#     qTables = [qTable1, qTable2]
+#     testTwoLinkRigidManipulator(qTables, algorithm)
 
 algorithm = 'Centralized'
 with open('./QTables/qT_' + algorithm + '.p', 'rb') as file:

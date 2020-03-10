@@ -9,10 +9,10 @@ def floatDD():
 
 def getKeysByValue(dictOfElements, valueToFind, centralized=False):
     """
-
-    :param dictOfElements:
-    :param valueToFind:
-    :return:
+    Return the keys that match with a certain value in the dictionary
+    :param dictOfElements: dictionary of elements
+    :param valueToFind: value of which you want to know the the key
+    :return: key of valueToFind
     """
     if dictOfElements:  # dictionary not empty
         listOfItems = dictOfElements.items()

@@ -2,7 +2,7 @@ def distributed(qTables, r, states, actions, alpha):
     """
     Eq. 2 Hysteretic Q-Learning paper.
     qTables: Qtables of the agents
-    r: reward
+    r: list of rewards (one for each agent)
     states: states as QTable index
     actions: actions chosen
     alpha: learning rate
@@ -42,7 +42,7 @@ def decentralized(qTables, states, actions, alpha, r, gamma, new_states):
     qTables: list of the qTables, one for each agent. Shape = (100,50,15)
     states: state index for the qTable
     actions: actions chosen
-    r: reward
+    r: list of rewards (one for each agent)
     gamma: discount factor
     alpha: learning rate
     new_states: new states
@@ -64,7 +64,7 @@ def hysteretic(qTables, states, actions, alpha, beta, r, gamma, new_states):
     actions: actions chosen
     alpha: first learning rate
     beta: second learning rate
-    r: reward
+    r: list of rewards (one for each agent)
     gamma: discount factor
     new_states: new states
     :return: list of qTables updated
