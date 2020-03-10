@@ -44,14 +44,12 @@ def centrifugalMatrix(theta):
 
 def dynamictheta1(tau1, tau2, theta2, v1):
     """
-
-    :param tau1:
-    :param tau2:
-    :param theta1:
-    :param theta2:
-    :param v1:
-    :param v2:
-    :return:
+    Get the acceleration for the first joint
+    :param tau1: torque of the first joint
+    :param tau2: torque of the second joint
+    :param theta2: theta of the second joint
+    :param v1: speed of the first joint
+    :return: acceleration
     """
     a1 = 1 / (p2 * (p1 + p2 + 2 * p3 * np.cos(theta2))) * (p1 * (tau1 - b1 * v1) - (p2 + p3 * np.cos(theta2) * tau2))
     return a1
@@ -59,10 +57,10 @@ def dynamictheta1(tau1, tau2, theta2, v1):
 
 def dynamictheta2(tau2, v2):
     """
-
-    :param tau2:
-    :param v2:
-    :return:
+    Get the acceleration for the second joint
+    :param tau2: torque of the second joint
+    :param v2: speed of the second joint
+    :return: acceleration
     """
     a2 = (tau2 / p2) - (b2 * v2)
     return a2
@@ -70,54 +68,56 @@ def dynamictheta2(tau2, v2):
 
 def getNextTheta1States(tau1, tau2, theta1, theta2, t, v1):
     """
-
-    :param tau1:
-    :param tau2:
-    :param theta1:
-    :param theta2:
-    :param t:
-    :param v1:
-    :param v2:
-    :return:
+    return the next states of the first joint given the acceleration
+    :param tau1: torque of the first joint
+    :param tau2: torque of the second joint
+    :param theta1: theta of the first joint
+    :param theta2: theta of the second joint
+    :param t: elapsed time
+    :param v1: speed of the first joint
+    :return: new theta and new speed
     """
     a1 = dynamictheta1(tau1, tau2, theta2, v1)
     new_theta1 = (theta1 + t * v1)
-    if new_theta1 < -2 * np.pi:
-        new_theta1 = (2 * np.pi) - ((-new_theta1) % (2 * np.pi))
-    elif new_theta1 > 2 * np.pi:
-        new_theta1 = -(2 * np.pi) + (new_theta1 % (2 * np.pi))
+    # if new_theta1 < -2 * np.pi:
+    #     new_theta1 = (2 * np.pi) - ((-new_theta1) % (2 * np.pi))
+    # elif new_theta1 > 2 * np.pi:
+    #     new_theta1 = -(2 * np.pi) + (new_theta1 % (2 * np.pi))
     new_v1 = v1 + t * a1
     return new_theta1, new_v1
 
 
 def getNextTheta2States(theta2, t, tau2, v2):
     """
-
-    :param theta2:
-    :param t:
-    :param tau2:
-    :param v2:
-    :return:
+    return the next states of the second joint given the acceleration
+    :param tau2: torque of the second joint
+    :param theta2: theta of the second joint
+    :param t: elapsed time
+    :param v2: speed of the second joint
+    :return: new theta and new speed
     """
     a2 = dynamictheta2(tau2, v2)
     new_theta2 = (theta2 + t * v2)
-    if new_theta2 < -2 * np.pi:
-        new_theta2 = (2 * np.pi) - ((-new_theta2) % (2 * np.pi))
-    elif new_theta2 > 2 * np.pi:
-        new_theta2 = -(2 * np.pi) + (new_theta2 % (2 * np.pi))
+    # if new_theta2 < -2 * np.pi:
+    #     new_theta2 = (2 * np.pi) - ((-new_theta2) % (2 * np.pi))
+    # elif new_theta2 > 2 * np.pi:
+    #     new_theta2 = -(2 * np.pi) + (new_theta2 % (2 * np.pi))
     new_v2 = v2 + t * a2
     return new_theta2, new_v2
 
 
 def generateQTables(centralized=False):
     """
-    :param centralized:
-    :return:
+    Generate empty qtables
+    :param centralized: true if centralized method is used
+    :return: qtables
     """
-    angles = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 100)), decimals=2)
-    speeds = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, 100)), decimals=2)
-    tau1 = np.round(list(np.linspace(-0.2, 0.2, 100)), decimals=2)
-    tau2 = np.round(list(np.linspace(-0.1, 0.1, 100)), decimals=2)
+    dim1 = 100
+    dim2 = 100
+    angles = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, dim1)), decimals=2)
+    speeds = np.round(list(np.linspace(-2 * np.pi, 2 * np.pi, dim1)), decimals=2)
+    tau1 = np.round(list(np.linspace(-0.2, 0.2, dim2)), decimals=2)
+    tau2 = np.round(list(np.linspace(-0.1, 0.1, dim2)), decimals=2)
     if centralized is False:
         qTable = {}
         for ang1 in angles:  # theta1
@@ -143,7 +143,7 @@ def generateQTables(centralized=False):
 
 def reward(angle, velocity):
     """
-    Reward function
+    Reward function as defined in the paper
     :param angle: first state (space)
     :param velocity: second state (derivate of the state (speed))
     :return: the reward with respect of the states
@@ -156,25 +156,16 @@ def reward(angle, velocity):
 
 def rewardCentralized(angles, velocities):
     """
-    Reward function for the centralized case
+    Reward function for the centralized case as defined in the paper
     :param angles: angles states
     :param velocities: velocities states
     :return: reward of the states
     """
     if np.abs(angles[0]) <= 5 * (np.pi / 180) and np.abs(angles[1]) <= 5 * (np.pi / 180) \
             and np.abs(velocities[0]) <= 0.1 and np.abs(velocities[1]) <= 0.1:
-        return 1
-    else:
         return 0
-
-def rewardTest(x,v):
-    """
-    Reward function
-    :param x: first state (space)
-    :param v: second state (derivate of the state (speed))
-    :return: the reward with respect of the states
-    """
-    return 0.8 * np.exp(-(np.power(x, 2)/(np.power(0.25,2)))) + 0.2 * np.exp(-(np.power(v, 2)/(np.power(0.25,2))))
+    else:
+        return -0.5
 
 def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=40, trials=5000):
     """
@@ -188,7 +179,7 @@ def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=4
     :return: the new actions to perform
     """
     if trial is not None and numOfEps > 0:
-        epsilons = np.linspace(0.8, 0.1, numOfEps)
+        epsilons = np.linspace(0.9, 0.1, numOfEps)
         index = int(trial // (trials / numOfEps))
         eps = epsilons[index]
     else:
@@ -221,6 +212,10 @@ def check_states(states):
     :return: states in the discrete grid
     """
     states = list(states)
+    if states[0] > 2 * np.pi: states[0] = 2 * np.pi
+    if states[1] > 2 * np.pi: states[1] = 2 * np.pi
+    if states[0] < -2 * np.pi: states[0] = -2 * np.pi
+    if states[1] < -2 * np.pi: states[1] = -2 * np.pi
     if states[2] > 2 * np.pi: states[2] = 2 * np.pi
     if states[3] > 2 * np.pi: states[3] = 2 * np.pi
     if states[2] < -2 * np.pi: states[2] = -2 * np.pi
@@ -255,8 +250,8 @@ def check_states(states):
         velocity_index2 += (dim2//2)
     else:
         velocity_index2 = (dim2//2) - velocity_index2
-    ##### P1 #####
 
+    ##### P1 #####
     if angle_index1 != dim1 and angle_index1 != 0:
         if angle_index1 == (dim1-1):
             possible_angles1 = [angles[angle_index1 - 1], angles[angle_index1]]
@@ -267,10 +262,8 @@ def check_states(states):
         possible_angles1 = [angles[angle_index1 - 1], angles[angle_index1 - 2]]
     else:
         possible_angles1 = [angles[angle_index1], angles[angle_index1 + 1]]
-    # possible_angles1 = [angles[(angle_index1 - 1) % (dim1//2)], angles[angle_index1 % (dim1//2)],
-    #                     angles[(angle_index1 + 1) % (dim1//2)]]
-    ##### P2 #####
 
+    ##### P2 #####
     if angle_index2 != dim1 and angle_index2 != 0:
         if angle_index2 == (dim1-1):
             possible_angles2 = [angles[angle_index2 - 1], angles[angle_index2]]
@@ -281,8 +274,7 @@ def check_states(states):
         possible_angles2 = [angles[angle_index2 - 1], angles[angle_index2 - 2]]
     else:
         possible_angles2 = [angles[angle_index2], angles[angle_index2 + 1]]
-    # possible_angles2 = [angles[(angle_index2 - 1) % (dim1//2)],
-    #                     angles[angle_index2 % (dim1//2)], angles[(angle_index2 + 1) % (dim1//2)]]
+
     ##### V1 #####
     if velocity_index1 != dim2 and velocity_index1 != 0:
         if velocity_index1 == (dim2-1):
@@ -294,6 +286,7 @@ def check_states(states):
         possible_velocities1 = [velocities[velocity_index1 - 1], velocities[velocity_index1 - 2]]
     else:
         possible_velocities1 = [velocities[velocity_index1], velocities[velocity_index1 + 1]]
+
     ##### V2 #####
     if velocity_index2 != dim2 and velocity_index2 != 0:
         if velocity_index2 == (dim2-1):

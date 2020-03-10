@@ -1,6 +1,6 @@
 from TwoLinkRigidManipulator.EnvironmentRigidManipulator import *
 from Utility import *
-from QLearningAlgorithms import *
+from TwoLinkRigidManipulator.QLearningAlgorithms import *
 import pandas as pd
 import matplotlib.pyplot as plt
 from collections import defaultdict
@@ -21,17 +21,18 @@ def trainDistributed():
     qTable1 = defaultdict(floatDD)
     qTable2 = defaultdict(floatDD)
     qTables = [qTable1, qTable2]
-
-    for trial in range(5000):
-        printProgressBar(trial, 5000, prefix='Distributed: ')
+    trials = 5000
+    for trial in range(trials):
+        printProgressBar(trial, trials, prefix='Distributed: ')
         states = (-1.15, -3.2, 0, 0)
         for t in np.arange(0, 20, samplingTime):
-            new_actions = choose_action(states, actions, qTables, trial)
+            new_actions = choose_action(states, actions, qTables, trial, trials=trials)
 
             theta1, v1 = getNextTheta1States(tau1=new_actions[0], tau2=new_actions[1], theta1=states[0],
                                              theta2=states[1], v1=states[2], t=samplingTime)
             theta2, v2 = getNextTheta2States(theta2=states[1], t=samplingTime, tau2=new_actions[1], v2=states[3])
 
+            # speed saturation
             if v1 > 2 * np.pi: v1 = 2 * np.pi
             if v2 > 2 * np.pi: v2 = 2 * np.pi
             if v1 < -2 * np.pi: v1 = -2 * np.pi
@@ -39,7 +40,7 @@ def trainDistributed():
 
             r1 = reward(states[0], states[2])
             r2 = reward(states[1], states[3])
-            r = r1 + r2
+            r = [r1, r2]
 
             states = (theta1, theta2, v1, v2)
             states = check_states(states)
@@ -59,17 +60,18 @@ def trainDecentralized():
     qTable1 = defaultdict(floatDD)
     qTable2 = defaultdict(floatDD)
     qTables = [qTable1, qTable2]
-
-    for trial in range(5000):
-        printProgressBar(trial, 5000, prefix='Decentralized: ')
+    trials = 5000
+    for trial in range(trials):
+        printProgressBar(trial, trials, prefix='Decentralized: ')
         states = (-1.15, -3.2, 0, 0)
         for t in np.arange(0, 20, 0.03):
-            new_actions = choose_action(states, actions, qTables, trial)
+            new_actions = choose_action(states, actions, qTables, trial, trials = trials)
 
             theta1, v1 = getNextTheta1States(tau1=new_actions[0], tau2=new_actions[1], theta1=states[0],
                                              theta2=states[1], v1=states[2], t=0.03)
             theta2, v2 = getNextTheta2States(theta2=states[1], t=samplingTime, tau2=new_actions[1], v2=states[3])
 
+            # speed saturation
             if v1 > 2 * np.pi: v1 = 2 * np.pi
             if v2 > 2 * np.pi: v2 = 2 * np.pi
             if v1 < -2 * np.pi: v1 = -2 * np.pi
@@ -109,13 +111,14 @@ def trainHysteretic():
                                              theta2=states[1], v1=states[2], t=0.03)
             theta2, v2 = getNextTheta2States(theta2=states[1], t=samplingTime, tau2=new_actions[1], v2=states[3])
 
+            # speed saturation
             if v1 > 2 * np.pi: v1 = 2 * np.pi
             if v2 > 2 * np.pi: v2 = 2 * np.pi
             if v1 < -2 * np.pi: v1 = -2 * np.pi
             if v2 < -2 * np.pi: v2 = -2 * np.pi
 
-            r1 = rewardTest(states[0], states[2])
-            r2 = rewardTest(states[1], states[3])
+            r1 = reward(states[0], states[2])
+            r2 = reward(states[1], states[3])
             r = [r1, r2]
 
             new_states = (theta1, theta2, v1, v2)
@@ -139,13 +142,14 @@ def trainCentralized():
     for trial in range(trials):
         states = (-1.15, -3.2, 0, 0)
         printProgressBar(trial, trials, prefix='Centralized: ')
-        for t in np.arange(0, 20, 0.03):
+        for t in np.arange(0, 10, 0.03):
             new_actions = choose_action(states, actions, qTable, trial, centralized=True, trials=trials)
 
             theta1, v1 = getNextTheta1States(tau1=new_actions[0], tau2=new_actions[1], theta1=states[0],
                                              theta2=states[1], v1=states[2], t=0.03)
             theta2, v2 = getNextTheta2States(theta2=states[1], t=samplingTime, tau2=new_actions[1], v2=states[3])
 
+            #speed saturation
             if v1 > 2 * np.pi: v1 = 2 * np.pi
             if v2 > 2 * np.pi: v2 = 2 * np.pi
             if v1 < -2 * np.pi: v1 = -2 * np.pi
@@ -165,7 +169,7 @@ def trainCentralized():
     pd.DataFrame.from_dict(qTable, orient='index').to_csv('./QTables/qT_Centralized.csv')
 
 
-# trainDistributed()
-# trainDecentralized()
-# trainHysteretic()
+trainDistributed()
+trainDecentralized()
+trainHysteretic()
 trainCentralized()

@@ -6,21 +6,26 @@ from Utility import floatDD  # do not delete, pickle need it!
 
 def testTwoLinkRigidManipulator(qTables, algorithm, centralized=False):
     """
-    Verify how much the robots have learnt.
+    Test using trained qtables.
     :param qTables: trained Q-Tables
     :param algorithm: Q-Algorithm used
     """
-    outputAngle1, outputSpeed1 = [], []
-    outputAngle2, outputSpeed2 = [], []
+    outputAngle1, outputSpeed1, outputTau1 = [], [], []
+    outputAngle2, outputSpeed2, outputTau2 = [], [], []
     states = (-1.15, -3.2, 0, 0)
     outputAngle1.append(states[0])
     outputAngle2.append(states[1])
     outputSpeed1.append(states[2])
     outputSpeed2.append(states[3])
-    for i in range(500):
-        actions = choose_action(states, None, qTables, None, centralized)
-        if i >20:
-            a=1
+    outputTau1.append(0.2)
+    outputTau2.append(0.02)
+    for i in range(100):
+        if i != 0:
+            actions = choose_action(states, None, qTables, None, centralized)
+            outputTau1.append(actions[0])
+            outputTau2.append(actions[1])
+        else:
+            actions = [0.2,0.02]
         theta1, v1 = getNextTheta1States(tau1=actions[0], tau2=actions[1], theta1=states[0],
                                          theta2=states[1], v1=states[2], t=0.03)
         outputAngle1.append(theta1)
@@ -36,19 +41,21 @@ def testTwoLinkRigidManipulator(qTables, algorithm, centralized=False):
     plt.plot(outputSpeed1, '-', label="Speed1")
     plt.plot(outputAngle2, '-', label="Space2")
     plt.plot(outputSpeed2, '-', label="Speed2")
+    # plt.plot(outputTau1, '-', label="Tau1")
+    # plt.plot(outputTau2, '-', label="Tau2")
     plt.legend()
     plt.title(algorithm)
     plt.savefig('./Plots/' + algorithm + '_test.png')
     plt.clf()
 
-#
-# for algorithm in ['Distributed', 'Decentralized', 'Hysteretic']:
-#     with open('./QTables/qT1_' + algorithm + '.p', 'rb') as file:
-#         qTable1 = pkl.load(file)
-#     with open('./QTables/qT2_' + algorithm + '.p', 'rb') as file:
-#         qTable2 = pkl.load(file)
-#     qTables = [qTable1, qTable2]
-#     testTwoLinkRigidManipulator(qTables, algorithm)
+
+for algorithm in ['Distributed','Decentralized','Hysteretic']:
+    with open('./QTables/qT1_' + algorithm + '.p', 'rb') as file:
+        qTable1 = pkl.load(file)
+    with open('./QTables/qT2_' + algorithm + '.p', 'rb') as file:
+        qTable2 = pkl.load(file)
+    qTables = [qTable1, qTable2]
+    testTwoLinkRigidManipulator(qTables, algorithm)
 
 algorithm = 'Centralized'
 with open('./QTables/qT_' + algorithm + '.p', 'rb') as file:

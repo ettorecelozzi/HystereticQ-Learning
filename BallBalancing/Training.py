@@ -1,4 +1,4 @@
-from QLearningAlgorithms import *
+from BallBalancing.QLearningAlgorithms import *
 import pandas as pd
 import matplotlib.pyplot as plt
 from BallBalancing.Environment import *
