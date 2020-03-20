@@ -173,7 +173,7 @@ def trainCentralized():
     pd.DataFrame.from_dict(qTable, orient='index').to_csv('./QTables/qT_Centralized.csv')
 
 
-# trainDistributed()
-# trainDecentralized()
+trainDistributed()
+trainDecentralized()
 trainHysteretic()
-# trainCentralized()
+trainCentralized()

@@ -18,7 +18,7 @@ def testTwoLinkRigidManipulator(qTables, algorithm, centralized=False):
     outputAngle2.append(states[1])
     outputSpeed1.append(states[2])
     outputSpeed2.append(states[3])
-    for i in range(60):
+    for i in range(100):
         if i != 0:
             actions = choose_action(states, None, qTables, None, centralized)
         else:
@@ -34,7 +34,7 @@ def testTwoLinkRigidManipulator(qTables, algorithm, centralized=False):
         outputSpeed2.append(v2)
 
         new_states = (theta1, theta2, v1, v2)
-        new_states = interpolate_continuos_states(new_states)
+        new_states = interpolate_continuous_states(new_states)
         states = new_states
     plt.plot(outputAngle1, '-', label="Space1")
     plt.plot(outputSpeed1, '-', label="Speed1")
@@ -47,8 +47,8 @@ def testTwoLinkRigidManipulator(qTables, algorithm, centralized=False):
     plt.close()
 
 #
-# for algorithm in ['Distributed','Decentralized','Hysteretic']:
-for algorithm in ['Hysteretic']:
+for algorithm in ['Distributed','Decentralized','Hysteretic']:
+# for algorithm in ['Hysteretic']:
     with open('./QTables/qT1_' + algorithm + '.p', 'rb') as file:
         qTable1 = pkl.load(file)
     with open('./QTables/qT2_' + algorithm + '.p', 'rb') as file:
@@ -56,7 +56,7 @@ for algorithm in ['Hysteretic']:
     qTables = [qTable1, qTable2]
     testTwoLinkRigidManipulator(qTables, algorithm)
 #
-# algorithm = 'Centralized'
-# with open('./QTables/qT_' + algorithm + '.p', 'rb') as file:
-#     qTable = pkl.load(file)
-# testTwoLinkRigidManipulator(qTable, algorithm, centralized=True)
+algorithm = 'Centralized'
+with open('./QTables/qT_' + algorithm + '.p', 'rb') as file:
+    qTable = pkl.load(file)
+testTwoLinkRigidManipulator(qTable, algorithm, centralized=True)
