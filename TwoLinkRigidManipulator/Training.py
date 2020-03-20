@@ -7,13 +7,13 @@ from collections import defaultdict
 import pickle as pkl
 
 # parameters
-gamma = 0.9
+gamma = 0.98
 beta = 0.1
 alpha = 0.9
 tau1 = np.round(list(np.linspace(-0.2, 0.2, 16)), decimals=2)
 tau2 = np.round(list(np.linspace(-0.1, 0.1, 16)), decimals=2)
 actions = [tau1, tau2]
-samplingTime = 0.03
+samplingTime = 0.05
 
 
 def trainDistributed():
@@ -38,12 +38,12 @@ def trainDistributed():
             if v1 < -2 * np.pi: v1 = -2 * np.pi
             if v2 < -2 * np.pi: v2 = -2 * np.pi
 
-            r1 = reward(states[0], states[2])
-            r2 = reward(states[1], states[3])
+            r1 = rewardQuadratic(states[0], states[2])
+            r2 = rewardQuadratic(states[1], states[3])
             r = [r1, r2]
 
             states = (theta1, theta2, v1, v2)
-            states = check_states(states)
+            states = interpolate_continuos_states(states)
 
             qTables = distributed(qTables, r, states, new_actions, alpha)
 
@@ -64,11 +64,11 @@ def trainDecentralized():
     for trial in range(trials):
         printProgressBar(trial, trials, prefix='Decentralized: ')
         states = (-1.15, -3.2, 0, 0)
-        for t in np.arange(0, 20, 0.03):
-            new_actions = choose_action(states, actions, qTables, trial, trials = trials)
+        for t in np.arange(0, 20, samplingTime):
+            new_actions = choose_action(states, actions, qTables, trial, trials=trials)
 
             theta1, v1 = getNextTheta1States(tau1=new_actions[0], tau2=new_actions[1], theta1=states[0],
-                                             theta2=states[1], v1=states[2], t=0.03)
+                                             theta2=states[1], v1=states[2], t=samplingTime)
             theta2, v2 = getNextTheta2States(theta2=states[1], t=samplingTime, tau2=new_actions[1], v2=states[3])
 
             # speed saturation
@@ -77,12 +77,12 @@ def trainDecentralized():
             if v1 < -2 * np.pi: v1 = -2 * np.pi
             if v2 < -2 * np.pi: v2 = -2 * np.pi
 
-            r1 = reward(states[0], states[2])
-            r2 = reward(states[1], states[3])
+            r1 = rewardQuadratic(states[0], states[2])
+            r2 = rewardQuadratic(states[1], states[3])
             r = [r1, r2]
 
             new_states = (theta1, theta2, v1, v2)
-            new_states = check_states(new_states)
+            new_states = interpolate_continuos_states(new_states)
 
             qTables = decentralized(qTables, states, new_actions, alpha, r, gamma, new_states)
             states = new_states
@@ -104,11 +104,11 @@ def trainHysteretic():
     for trial in range(trials):
         printProgressBar(trial, trials, prefix='Hysteretic: ')
         states = (-1.15, -3.2, 0, 0)
-        for t in np.arange(0, 20, 0.03):
+        for t in np.arange(0, 20, samplingTime):
             new_actions = choose_action(states, actions, qTables, trial, trials=trials)
 
             theta1, v1 = getNextTheta1States(tau1=new_actions[0], tau2=new_actions[1], theta1=states[0],
-                                             theta2=states[1], v1=states[2], t=0.03)
+                                             theta2=states[1], v1=states[2], t=samplingTime)
             theta2, v2 = getNextTheta2States(theta2=states[1], t=samplingTime, tau2=new_actions[1], v2=states[3])
 
             # speed saturation
@@ -117,12 +117,12 @@ def trainHysteretic():
             if v1 < -2 * np.pi: v1 = -2 * np.pi
             if v2 < -2 * np.pi: v2 = -2 * np.pi
 
-            r1 = reward(states[0], states[2])
-            r2 = reward(states[1], states[3])
+            r1 = rewardQuadratic(states[0], states[2])
+            r2 = rewardQuadratic(states[1], states[3])
             r = [r1, r2]
 
             new_states = (theta1, theta2, v1, v2)
-            new_states = check_states(new_states)
+            new_states = interpolate_continuos_states(new_states)
 
             qTables = hysteretic(qTables, states, new_actions, alpha, beta, r, gamma, new_states)
             states = new_states
@@ -142,25 +142,27 @@ def trainCentralized():
     for trial in range(trials):
         states = (-1.15, -3.2, 0, 0)
         printProgressBar(trial, trials, prefix='Centralized: ')
-        for t in np.arange(0, 10, 0.03):
+        for t in np.arange(0, 10, samplingTime):
             new_actions = choose_action(states, actions, qTable, trial, centralized=True, trials=trials)
             # theta1, theta2, v1, v2 = getNexstates(np.array([[states[0]], [states[1]]]),
             #                                       np.array([[states[2]], [states[3]]]),
             #                                       np.array([[new_actions[0]], [new_actions[1]]]))
             theta1, v1 = getNextTheta1States(tau1=new_actions[0], tau2=new_actions[1], theta1=states[0],
-                                             theta2=states[1], v1=states[2], t=0.03)
+                                             theta2=states[1], v1=states[2], t=samplingTime)
             theta2, v2 = getNextTheta2States(theta2=states[1], t=samplingTime, tau2=new_actions[1], v2=states[3])
 
-            #speed saturation
+            # speed saturation
             if v1 > 2 * np.pi: v1 = 2 * np.pi
             if v2 > 2 * np.pi: v2 = 2 * np.pi
             if v1 < -2 * np.pi: v1 = -2 * np.pi
             if v2 < -2 * np.pi: v2 = -2 * np.pi
 
-            r = rewardCentralized([states[0],states[1]],[states[2],states[3]])
+            r1 = rewardQuadratic(states[0], states[2])
+            r2 = rewardQuadratic(states[1], states[3])
+            r = r1 + r2  # sum or product??
 
             new_states = (theta1, theta2, v1, v2)
-            new_states = check_states(new_states)
+            new_states = interpolate_continuos_states(new_states)
 
             qTable = centralized(states, new_actions, r, gamma, alpha, qTable, new_states)
             states = new_states
@@ -173,5 +175,5 @@ def trainCentralized():
 
 # trainDistributed()
 # trainDecentralized()
-# trainHysteretic()
-trainCentralized()
+trainHysteretic()
+# trainCentralized()

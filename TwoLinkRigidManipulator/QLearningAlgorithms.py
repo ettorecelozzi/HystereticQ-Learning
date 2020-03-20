@@ -8,12 +8,10 @@ def distributed(qTables, r, states, actions, alpha):
     alpha: learning rate
     :return: list of qtables updated
     """
-    k=0
-    for a, q in zip(actions, qTables):
+    for k, (a, q) in enumerate(zip(actions, qTables)):
         delta = r[k] - q[states][a]
         if delta >= 0:
             q[states][a] += alpha * delta
-        k+=1
     return qTables
 
 
@@ -48,11 +46,9 @@ def decentralized(qTables, states, actions, alpha, r, gamma, new_states):
     new_states: new states
     :return: list of qTables updated
     """
-    k = 0
-    for a, q in zip(actions, qTables):
+    for k, (a, q) in enumerate(zip(actions, qTables)):
         maximum = 0 if not q[new_states] else max(q[new_states].values())
         q[states][a] = (1 - alpha) * q[states][a] + alpha * (r[k] + gamma * maximum)
-        k+=1
     return qTables
 
 
@@ -69,13 +65,32 @@ def hysteretic(qTables, states, actions, alpha, beta, r, gamma, new_states):
     new_states: new states
     :return: list of qTables updated
     """
-    k=0
-    for a, q in zip(actions, qTables):
+    for k, (a, q) in enumerate(zip(actions, qTables)):
         maximum = 0 if not q[new_states] else max(q[new_states].values())
         delta = r[k] + gamma * maximum - q[states][a]
         if delta >= 0:
             q[states][a] += delta * alpha
         else:
             q[states][a] += delta * beta
-        k += 1
     return qTables
+
+
+def hysteretic_q1(qTable, states, actions, alpha, beta, r, gamma, new_states):
+    for a in actions:
+        maximum = 0 if not qTable[new_states] else max(qTable[new_states].values())
+        delta = r + gamma * maximum - qTable[states][a]
+        if delta >= 0:
+            qTable[states][a] += delta * alpha
+        else:
+            qTable[states][a] += delta * beta
+    return qTable
+
+
+def hysteretic_q2(qTable, states, action, alpha, beta, r, gamma, new_states):
+    maximum = 0 if not qTable[new_states] else max(qTable[new_states].values())
+    delta = r + gamma * maximum - qTable[states][action]
+    if delta >= 0:
+        qTable[states][action] += delta * alpha
+    else:
+        qTable[states][action] += delta * beta
+    return qTable
