@@ -43,7 +43,7 @@ def trainDistributed():
             r = [r1, r2]
 
             states = (theta1, theta2, v1, v2)
-            states = interpolate_continuos_states(states)
+            states = interpolate_continuous_states(states)
 
             qTables = distributed(qTables, r, states, new_actions, alpha)
 
@@ -82,7 +82,7 @@ def trainDecentralized():
             r = [r1, r2]
 
             new_states = (theta1, theta2, v1, v2)
-            new_states = interpolate_continuos_states(new_states)
+            new_states = interpolate_continuous_states(new_states)
 
             qTables = decentralized(qTables, states, new_actions, alpha, r, gamma, new_states)
             states = new_states
@@ -122,7 +122,7 @@ def trainHysteretic():
             r = [r1, r2]
 
             new_states = (theta1, theta2, v1, v2)
-            new_states = interpolate_continuos_states(new_states)
+            new_states = interpolate_continuous_states(new_states)
 
             qTables = hysteretic(qTables, states, new_actions, alpha, beta, r, gamma, new_states)
             states = new_states
@@ -162,7 +162,7 @@ def trainCentralized():
             r = r1 + r2  # sum or product??
 
             new_states = (theta1, theta2, v1, v2)
-            new_states = interpolate_continuos_states(new_states)
+            new_states = interpolate_continuous_states(new_states)
 
             qTable = centralized(states, new_actions, r, gamma, alpha, qTable, new_states)
             states = new_states
