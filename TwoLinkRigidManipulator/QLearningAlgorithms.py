@@ -73,24 +73,3 @@ def hysteretic(qTables, states, actions, alpha, beta, r, gamma, new_states):
         else:
             q[states][a] += delta * beta
     return qTables
-
-
-def hysteretic_q1(qTable, states, actions, alpha, beta, r, gamma, new_states):
-    for a in actions:
-        maximum = 0 if not qTable[new_states] else max(qTable[new_states].values())
-        delta = r + gamma * maximum - qTable[states][a]
-        if delta >= 0:
-            qTable[states][a] += delta * alpha
-        else:
-            qTable[states][a] += delta * beta
-    return qTable
-
-
-def hysteretic_q2(qTable, states, action, alpha, beta, r, gamma, new_states):
-    maximum = 0 if not qTable[new_states] else max(qTable[new_states].values())
-    delta = r + gamma * maximum - qTable[states][action]
-    if delta >= 0:
-        qTable[states][action] += delta * alpha
-    else:
-        qTable[states][action] += delta * beta
-    return qTable
