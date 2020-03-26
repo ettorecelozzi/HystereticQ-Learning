@@ -25,7 +25,7 @@ def trainDistributed():
     for trial in range(trials):
         printProgressBar(trial, trials, prefix='Distributed: ')
         states = (-1.15, -3.2, 0, 0)
-        for t in np.arange(0, 20, samplingTime):
+        for t in np.arange(0, 5, samplingTime):
             new_actions = choose_action(states, actions, qTables, trial, trials=trials)
 
             theta1, v1 = getNextTheta1States(tau1=new_actions[0], tau2=new_actions[1], theta1=states[0],
@@ -64,7 +64,7 @@ def trainDecentralized():
     for trial in range(trials):
         printProgressBar(trial, trials, prefix='Decentralized: ')
         states = (-1.15, -3.2, 0, 0)
-        for t in np.arange(0, 20, samplingTime):
+        for t in np.arange(0, 5, samplingTime):
             new_actions = choose_action(states, actions, qTables, trial, trials=trials)
 
             theta1, v1 = getNextTheta1States(tau1=new_actions[0], tau2=new_actions[1], theta1=states[0],
@@ -77,8 +77,8 @@ def trainDecentralized():
             if v1 < -2 * np.pi: v1 = -2 * np.pi
             if v2 < -2 * np.pi: v2 = -2 * np.pi
 
-            r1 = rewardQuadratic(states[0], states[2])
-            r2 = rewardQuadratic(states[1], states[3])
+            r1 = reward(states[0], states[2])
+            r2 = reward(states[1], states[3])
             r = [r1, r2]
 
             new_states = (theta1, theta2, v1, v2)
@@ -104,7 +104,7 @@ def trainHysteretic():
     for trial in range(trials):
         printProgressBar(trial, trials, prefix='Hysteretic: ')
         states = (-1.15, -3.2, 0, 0)
-        for t in np.arange(0, 20, samplingTime):
+        for t in np.arange(0, 5, samplingTime):
             new_actions = choose_action(states, actions, qTables, trial, trials=trials)
 
             theta1, v1 = getNextTheta1States(tau1=new_actions[0], tau2=new_actions[1], theta1=states[0],
@@ -142,7 +142,7 @@ def trainCentralized():
     for trial in range(trials):
         states = (-1.15, -3.2, 0, 0)
         printProgressBar(trial, trials, prefix='Centralized: ')
-        for t in np.arange(0, 10, samplingTime):
+        for t in np.arange(0, 5, samplingTime):
             new_actions = choose_action(states, actions, qTable, trial, centralized=True, trials=trials)
             # theta1, theta2, v1, v2 = getNexstates(np.array([[states[0]], [states[1]]]),
             #                                       np.array([[states[2]], [states[3]]]),
@@ -157,9 +157,7 @@ def trainCentralized():
             if v1 < -2 * np.pi: v1 = -2 * np.pi
             if v2 < -2 * np.pi: v2 = -2 * np.pi
 
-            r1 = rewardQuadratic(states[0], states[2])
-            r2 = rewardQuadratic(states[1], states[3])
-            r = r1 + r2  # sum or product??
+            r = rewardCentralized([states[0], states[1]],[states[2], states[3]])
 
             new_states = (theta1, theta2, v1, v2)
             new_states = interpolate_continuous_states(new_states)
@@ -173,7 +171,7 @@ def trainCentralized():
     pd.DataFrame.from_dict(qTable, orient='index').to_csv('./QTables/qT_Centralized.csv')
 
 
-trainDistributed()
-trainDecentralized()
-trainHysteretic()
+# trainDistributed()
+# trainDecentralized()
+# trainHysteretic()
 trainCentralized()
