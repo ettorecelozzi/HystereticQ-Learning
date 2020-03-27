@@ -217,7 +217,7 @@ def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=4
         return tuple(new_actions)
 
 
-def interpolate_continuous_states(states):
+def interpolate_continuous_states(states, decimals):
     """
     Givent the continuous states return the states given by the interpolation of fixed centers
     :param states: continuous states
@@ -229,9 +229,8 @@ def interpolate_continuous_states(states):
                        -5 * np.pi / 180, 0,
                        5 * np.pi / 180, 15 * np.pi / 180, 30 * np.pi / 180, 80 * np.pi / 180, 130 * np.pi / 180])
 
-    speeds = np.array(
-        [-360 * np.pi / 180, -180 * np.pi / 180, -30 * np.pi / 180, 0, 30 * np.pi / 180, 180 * np.pi / 180,
-         360 * np.pi / 180])
+    speeds = np.array([-360 * np.pi / 180, -180 * np.pi / 180, -30 * np.pi / 180, 0, 30 * np.pi / 180,
+                       180 * np.pi / 180, 360 * np.pi / 180])
 
     # cyclic angles, from -pi to positive_extr
     positive_extr = (130 * np.pi / 180)
@@ -240,17 +239,47 @@ def interpolate_continuous_states(states):
     if theta2 > positive_extr: theta2 = -np.pi + np.abs(theta2 % positive_extr)
     if theta2 < -np.pi: theta2 = positive_extr - np.abs(theta2 % -np.pi)
 
-    new_states = (
-        round(
-            getWeights(theta1, angles, min(range(len(angles)), key=lambda i: euclidean(angles[i], states[0]))) * theta1,
-            2),
-        round(
-            getWeights(theta2, angles, min(range(len(angles)), key=lambda i: euclidean(angles[i], states[1]))) * theta2,
-            2),
-        round(getWeights(v1, speeds, min(range(len(speeds)), key=lambda i: euclidean(speeds[i], states[2]))) * v1, 2),
-        round(getWeights(v2, speeds, min(range(len(speeds)), key=lambda i: euclidean(speeds[i], states[3]))) * v2), 2)
+    index_theta1 = min(range(len(angles)), key=lambda i: euclidean(angles[i], states[0]))
+    index_theta2 = min(range(len(angles)), key=lambda i: euclidean(angles[i], states[1]))
+    index_v1 = min(range(len(speeds)), key=lambda i: euclidean(speeds[i], states[2]))
+    index_v2 = min(range(len(speeds)), key=lambda i: euclidean(speeds[i], states[3]))
+
+    new_states = (round(getWeights(theta1, angles, index_theta1) * theta1, decimals),
+                  round(getWeights(theta2, angles, index_theta2) * theta2, decimals),
+                  round(getWeights(v1, speeds, index_v1) * v1, decimals),
+                  round(getWeights(v2, speeds, index_v2) * v2, decimals))
 
     return new_states
+
+
+# def interpolate_continuous_states(states, decimals):
+#     """
+#     Givent the continuous states return the states given by the interpolation of fixed centers
+#     :param states: continuous states
+#     :return: discrete states
+#     """
+#     theta1, theta2, v1, v2 = states[0], states[1], states[2], states[3]
+#
+#     angles = np.array([-180, -130, -80, -30, -15, -5, 0, 5, 15, 30, 80, 130]) * np.pi / 180
+#     speeds = np.array([-360, -180, -30, 0, 30, 180, 360]) * np.pi / 180
+#
+#     # cyclic angles, from -pi to positive_extr
+#     positive_extr = (130 * np.pi / 180)
+#     if theta1 > positive_extr: theta1 = -np.pi + np.abs(theta1 % positive_extr)
+#     if theta1 < -np.pi: theta1 = positive_extr - np.abs(theta1 % -np.pi)
+#     if theta2 > positive_extr: theta2 = -np.pi + np.abs(theta2 % positive_extr)
+#     if theta2 < -np.pi: theta2 = positive_extr - np.abs(theta2 % -np.pi)
+#
+#     index_theta1 = min(range(len(angles)), key=lambda i: euclidean(angles[i], states[0]))
+#     index_theta2 = min(range(len(angles)), key=lambda i: euclidean(angles[i], states[1]))
+#     index_v1 = min(range(len(speeds)), key=lambda i: euclidean(speeds[i], states[2]))
+#     index_v2 = min(range(len(speeds)), key=lambda i: euclidean(speeds[i], states[3]))
+#
+#     new_states = (np.round(getWeights(theta1, angles, index_theta1) * theta1, decimals=decimals),
+#                   np.round(getWeights(theta2, angles, index_theta2) * theta2, decimals=decimals),
+#                   np.round(getWeights(v1, speeds, index_v1) * v1, decimals=decimals),
+#                   np.round(getWeights(v2, speeds, index_v2) * v2, decimals=decimals))
+#     return new_states
 
 
 def getWeights(state, centers, index):
