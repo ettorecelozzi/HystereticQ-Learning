@@ -30,7 +30,7 @@ def testBallBalancing(qTables, algorithm, centralized=False):
     plt.clf()
 
 
-for algorithm in ['Distributed', 'Decentralized', 'Hysteretic']:
+for algorithm in ['Decentralized', 'Hysteretic']:
     with open('./QTables/qT1_' + algorithm + '.p', 'rb') as file:
         qTable1 = pkl.load(file)
     with open('./QTables/qT2_' + algorithm + '.p', 'rb') as file:
