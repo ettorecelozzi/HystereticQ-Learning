@@ -10,7 +10,7 @@ def testBallBalancing(qTables, algorithm, centralized=False):
     :param algorithm: Q-Algorithm used
     """
     outputSpace, outputSpeed = [], []
-    states = (0.49, 0.06)  # initial states
+    states = (0.495, 0.061)  # initial states
     outputSpace.append(states[0])
     outputSpeed.append(states[1])
     for i in range(30):  # infinite game loop
@@ -19,7 +19,7 @@ def testBallBalancing(qTables, algorithm, centralized=False):
         outputSpace.append(x)
         outputSpeed.append(v)
         if np.abs(x) > 1: break  # the ball has fallen
-        new_states = (np.round(x, decimals=2), np.round(v, decimals=2))
+        new_states = (np.round(x, decimals=3), np.round(v, decimals=3))
         new_states = check_states(new_states)  # check if the states have a match in the discrete grid
         states = new_states
     plt.plot(outputSpace, '-', label="Space")

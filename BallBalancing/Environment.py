@@ -9,9 +9,9 @@ def generateQTable(centralized=False):
     :return: QTable
     """
     dict = {}
-    positions = np.round(list(np.linspace(-1, 1, 100)), decimals=2)
-    velocities = np.round(list(np.linspace(-3, 3, 50)), decimals=2)
-    actions = np.round(list(np.linspace(-1, 1, 15)), decimals=2)
+    positions = np.round(list(np.linspace(-1, 1, 100)), decimals=3)
+    velocities = np.round(list(np.linspace(-3, 3, 50)), decimals=3)
+    actions = np.round(list(np.linspace(-1, 1, 15)), decimals=3)
     if centralized is False:
         for p in positions:
             for v in velocities:
@@ -94,7 +94,7 @@ def getNextStates(h1, h2, v, t, x_0, v_0):
     return xnew, vnew
 
 
-def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=40):
+def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=40,trials=5000):
     """
     Select next action balancing exploration and exploitation
     :param states: actual states
@@ -108,7 +108,7 @@ def choose_action(states, actions, qTables, trial, centralized=False, numOfEps=4
 
     if trial is not None and numOfEps > 0:
         epsilons = np.linspace(0.8, 0.1, numOfEps)
-        index = int(trial // (5000 / numOfEps))
+        index = int(trial // (trials / numOfEps))
         eps = epsilons[index]
     else:
         eps = 0.1
@@ -137,8 +137,8 @@ def check_states(states):
     :param states: float states
     :return: states in the discrete grid
     """
-    positions = np.round(list(np.linspace(-1, 1, 100)), decimals=2)
-    velocities = np.round(list(np.linspace(-3, 3, 50)), decimals=2)
+    positions = np.round(list(np.linspace(-1, 1, 100)), decimals=3)
+    velocities = np.round(list(np.linspace(-3, 3, 50)), decimals=3)
     position_space = 1 / 50
     velocity_space = 3 / 25
     position_index = np.abs(int(np.round(states[0] / position_space, decimals=0)))
