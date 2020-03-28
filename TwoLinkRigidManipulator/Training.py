@@ -15,7 +15,7 @@ tau1 = np.round(list(np.linspace(-0.2, 0.2, 16)), decimals=decimals)
 tau2 = np.round(list(np.linspace(-0.1, 0.1, 16)), decimals=decimals)
 actions = [tau1, tau2]
 samplingTime = 0.05
-trials = 5000
+trials = 10000
 
 
 def trainDecentralized():
