@@ -22,7 +22,7 @@ def testTwoLinkRigidManipulator(qTables, algorithm, centralized=False):
     outputSpeed1.append(states[2])
     outputSpeed2.append(states[3])
     actions = [0.2, 0.02]
-    for i in range(100):
+    for i in range(600):
         if i != 0: actions = choose_action(states, None, qTables, None, centralized)
 
         theta1, v1 = getNextTheta1States(tau1=actions[0], tau2=actions[1], theta1=states[0],

@@ -224,7 +224,6 @@ def interpolate_continuous_states(states, decimals):
     :return: discrete states
     """
     theta1, theta2, v1, v2 = states[0], states[1], states[2], states[3]
-
     angles = np.array([-180 * np.pi / 180, -130 * np.pi / 180, -80 * np.pi / 180, -30 * np.pi / 180, -15 * np.pi / 180,
                        -5 * np.pi / 180, 0,
                        5 * np.pi / 180, 15 * np.pi / 180, 30 * np.pi / 180, 80 * np.pi / 180, 130 * np.pi / 180])
@@ -247,7 +246,7 @@ def interpolate_continuous_states(states, decimals):
     new_states = (round(getWeights(theta1, angles, index_theta1) * theta1, decimals),
                   round(getWeights(theta2, angles, index_theta2) * theta2, decimals),
                   round(getWeights(v1, speeds, index_v1) * v1, decimals),
-                  round(getWeights(v2, speeds, index_v2) * v2), decimals)
+                  round(getWeights(v2, speeds, index_v2) * v2, decimals))
 
     return new_states
 

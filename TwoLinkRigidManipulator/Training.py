@@ -130,7 +130,6 @@ def trainCentralized():
     pkl.dump(qTable, open('./QTables/qT_Centralized.p', 'wb'))
     pd.DataFrame.from_dict(qTable, orient='index').to_csv('./QTables/qT_Centralized.csv')
 
-
+trainCentralized()
 trainDecentralized()
 trainHysteretic()
-trainCentralized()
